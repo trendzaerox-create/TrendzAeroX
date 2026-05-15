@@ -53,7 +53,7 @@ export default function NewsletterSection() {
 
             <p className="mx-auto mt-4 max-w-[620px] text-[15px] leading-7 text-neutral-600 sm:text-[16px]">
               Subscribe for product launches, styling drops, and special
-              promotions from Trendz Firenze.
+              promotions from Trendz AeroX.
             </p>
           </div>
 
@@ -112,7 +112,7 @@ export default function NewsletterSection() {
 
           {success && (
             <p className="mt-4 text-[14px] font-medium text-green-700">
-              {message || "Thank you for subscribing to Trendz Firenze."}
+              {message || "Thank you for subscribing to Trendz AeroX."}
             </p>
           )}
 

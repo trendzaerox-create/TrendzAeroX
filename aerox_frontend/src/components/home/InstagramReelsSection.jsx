@@ -155,7 +155,7 @@ export default function InstagramReelsSection() {
 
             <p className="mt-3 max-w-[620px] text-sm leading-6 text-neutral-600 sm:text-[15px]">
               Discover the newest fashion moments, styling inspiration, and
-              premium handbag highlights from Trendz Firenze.
+              premium electronics highlights from Trendz Aerox.
             </p>
           </div>
 
@@ -165,7 +165,7 @@ export default function InstagramReelsSection() {
             rel="noreferrer"
             className="inline-flex w-fit items-center gap-2 rounded-full border border-neutral-300 bg-white px-4 py-2.5 text-[11px] font-semibold uppercase tracking-[0.16em] text-[#111111] shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:border-neutral-400 hover:bg-neutral-50 sm:text-[12px]"
           >
-            <span>@trendzfirenze</span>
+            <span>@trendzaerox</span>
           </a>
         </div>
 

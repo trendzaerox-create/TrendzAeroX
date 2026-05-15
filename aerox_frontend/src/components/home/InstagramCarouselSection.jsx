@@ -45,7 +45,7 @@ function CarouselCard({ post }) {
       <div className="relative aspect-[4/5] w-full overflow-hidden bg-neutral-100">
         <img
           src={activeItem.mediaUrl}
-          alt={activeItem.alt || "Trendz Firenze Instagram post"}
+          alt={activeItem.alt || "Trendz AeroX Instagram post"}
           className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
           loading="lazy"
         />
@@ -158,7 +158,7 @@ export default function InstagramCarouselSection() {
 
             <p className="mt-3 text-sm leading-6 text-neutral-600 sm:text-[15px]">
               Explore our latest carousel stories, signature details, and luxury
-              style moments from Trendz Firenze.
+              style moments from Trendz AeroX.
             </p>
           </div>
 
@@ -168,7 +168,7 @@ export default function InstagramCarouselSection() {
             rel="noreferrer"
             className="text-[12px] font-semibold uppercase tracking-[0.14em] text-[#111111] transition-opacity duration-300 hover:opacity-70 sm:text-[13px]"
           >
-            Follow @trendzfirenze
+            Follow @trendzaerox
           </a>
         </div>
 

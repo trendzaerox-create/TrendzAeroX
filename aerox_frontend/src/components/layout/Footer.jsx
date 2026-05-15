@@ -32,14 +32,14 @@ const addressInfo = {
     "1, Ho Chi Minh Sarani, Kankaria Estates, Park Street Area, Kolkata, West Bengal 700071, India",
   helpline: "+91 9123315539",
   timing: "10:00am to 6:00pm (Mon-Sat)",
-  email: "support@trendzfirenze.com",
+  email: "support@trendzaerox.com",
 };
 
 const socialLinks = [
-  { icon: FaFacebookF, href: "https://www.facebook.com/trendzfirenze", label: "Facebook" },
-  { icon: FaXTwitter, href: "https://x.com/trendzfirenze", label: "X" },
-  { icon: FaInstagram, href: "https://www.instagram.com/trendzfirenze/", label: "Instagram" },
-  { icon: FaYoutube, href: "https://www.youtube.com/@trendzfirenze", label: "YouTube" },
+  { icon: FaFacebookF, href: "https://www.facebook.com/share/18PszxkWi3/", label: "Facebook" },
+  { icon: FaXTwitter, href: "/", label: "X" },
+  { icon: FaInstagram, href: "https://www.instagram.com/trendzaerox?igsh=MXVqY252eHNxZXQzcQ==", label: "Instagram" },
+  { icon: FaYoutube, href: "https://youtube.com/@trendzaeroxofficial?si=nmbT0NJD-wtqIb8T", label: "YouTube" },
 ];
 
 function FooterColumn({ title, links }) {
@@ -165,7 +165,7 @@ export default function Footer() {
               <Link href="/test" className="transition duration-300 hover:text-white">
                 ©
               </Link>{" "}
-              2026 — Trendz Firenze
+              2026 — Trendz AeroX
             </p>
           </div>
 
