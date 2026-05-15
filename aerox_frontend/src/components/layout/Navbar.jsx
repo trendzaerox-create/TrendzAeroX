@@ -100,14 +100,22 @@ export default function Navbar() {
 
           <Link href="/" className="group relative flex shrink-0 items-center">
   <div className="relative -my-2 scale-[1.05] sm:scale-[1.1]">
-    <Image
+    {/* <Image
       src="/images/logo/TrendzAeroxLogo.png"
       alt="Trendz Aerox"
       width={220}
       height={80}
       priority
       className="h-[52px] w-auto object-contain transition-all duration-500 ease-out group-hover:scale-[1.03] group-hover:opacity-90 sm:h-[58px]"
-    />
+    /> */}
+
+    <Link href="/" className="group relative flex shrink-0 items-center">
+  <img
+    src="/images/logo/TrendzAeroXLogo.png"
+    alt="Trendz AeroX"
+    className="h-[52px] w-auto object-contain transition-all duration-500 ease-out group-hover:scale-[1.05] group-hover:opacity-90 sm:h-[56px]"
+  />
+</Link>
   </div>
 </Link>
         </div>
