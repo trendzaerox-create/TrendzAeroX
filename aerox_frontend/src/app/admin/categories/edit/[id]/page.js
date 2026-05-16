@@ -121,10 +121,13 @@ export default function AdminEditCategoryPage() {
               </div>
 
               <CategoryForm
-                initialValues={{ name: selectedCategory?.name || "" }}
-                onSubmit={handleSubmit}
-                loading={submitting}
-              />
+  initialValues={{
+    name: selectedCategory?.name || "",
+    imageUrl: selectedCategory?.imageUrl || "",
+  }}
+  onSubmit={handleSubmit}
+  loading={submitting}
+/>
             </div>
           )}
         </div>

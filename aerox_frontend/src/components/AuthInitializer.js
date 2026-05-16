@@ -1,42 +1,5 @@
 
 
-// "use client";
-
-// import { useEffect } from "react";
-// import { useDispatch } from "react-redux";
-// import { loadCurrentUser } from "@/features/auth/authSlice";
-// import { getToken } from "@/lib/tokenStorage";
-
-// export default function AuthInitializer() {
-//   const dispatch = useDispatch();
-
-//   useEffect(() => {
-//     const token = getToken();
-
-//     if (!token) return;
-
-//     dispatch(loadCurrentUser());
-//   }, [dispatch]);
-
-//   return null;
-// }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
