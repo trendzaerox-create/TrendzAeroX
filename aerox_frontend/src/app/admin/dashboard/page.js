@@ -70,7 +70,7 @@ export default function Dashboard() {
               lineHeight: 1.5,
             }}
           >
-            Welcome to your Trendz Firenze control panel
+            Welcome to your Trendz AeroX control panel
           </p>
         </div>
 

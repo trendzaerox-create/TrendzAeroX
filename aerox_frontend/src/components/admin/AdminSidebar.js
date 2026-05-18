@@ -281,7 +281,7 @@ export default function AdminSidebar() {
           </button>
 
           <div style={brandWrapStyle}>
-            <h2 style={brandTitleStyle}>Trendz Firenze</h2>
+            <h2 style={brandTitleStyle}>Trendz AeroX</h2>
             <p style={brandSubTitleStyle}>Admin Panel</p>
           </div>
 
