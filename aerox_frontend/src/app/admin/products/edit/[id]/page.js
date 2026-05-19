@@ -1805,6 +1805,95 @@ export default function EditProductPage() {
             />
           </div>
 
+
+
+          {images.length > 0 && (
+  <div>
+    <label style={labelStyle}>Current Product Images</label>
+
+    <div
+      style={{
+        display: "flex",
+        gap: "12px",
+        flexWrap: "wrap",
+        marginTop: "10px",
+      }}
+    >
+      {images.map((item, index) => {
+        const mediaUrl = resolveUrl(getMediaUrl(item));
+        const isVideo =
+          mediaUrl.endsWith(".mp4") ||
+          mediaUrl.endsWith(".webm") ||
+          mediaUrl.endsWith(".mov");
+
+        return (
+          <div
+            key={`${mediaUrl}-${index}`}
+            style={{
+              position: "relative",
+              width: "150px",
+              border: "1px solid #e5e7eb",
+              borderRadius: "12px",
+              padding: "8px",
+              background: "#ffffff",
+            }}
+          >
+            {isVideo ? (
+              <video
+                src={mediaUrl}
+                controls
+                style={{
+                  width: "100%",
+                  height: "120px",
+                  objectFit: "cover",
+                  borderRadius: "8px",
+                  background: "#f3f4f6",
+                }}
+              />
+            ) : (
+              <img
+                src={mediaUrl}
+                alt="Product"
+                style={{
+                  width: "100%",
+                  height: "120px",
+                  objectFit: "cover",
+                  borderRadius: "8px",
+                  background: "#f3f4f6",
+                }}
+              />
+            )}
+
+            <button
+              type="button"
+              onClick={() => removeImage(index)}
+              style={{
+                position: "absolute",
+                top: "-8px",
+                right: "-8px",
+                background: "#dc2626",
+                color: "#fff",
+                border: "none",
+                borderRadius: "50%",
+                width: "24px",
+                height: "24px",
+                cursor: "pointer",
+                fontSize: "16px",
+                fontWeight: "700",
+              }}
+            >
+              ×
+            </button>
+          </div>
+        );
+      })}
+    </div>
+  </div>
+)}
+
+
+
+
           <div style={{ display: "flex", gap: "12px", flexWrap: "wrap" }}>
             <button
               type="button"
