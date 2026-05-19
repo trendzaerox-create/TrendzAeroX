@@ -1,5 +1,51 @@
 
 
+// package com.mydev.ecommerce.product.dto;
+
+// import jakarta.validation.constraints.NotBlank;
+// import jakarta.validation.constraints.NotNull;
+// import jakarta.validation.constraints.Size;
+
+// import java.util.List;
+
+// public record ProductRequest(
+
+//     @NotBlank
+//     @Size(max = 200)
+//     String title,
+
+//     String description,
+
+//     @NotNull
+//     Integer priceInr,
+
+//     Integer mrpInr,
+
+//     @NotNull
+//     Integer stock,
+
+//     @NotNull
+//     Long categoryId,
+
+//     List<String> images
+
+// ) {}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 package com.mydev.ecommerce.product.dto;
 
 import jakarta.validation.constraints.NotBlank;
@@ -10,23 +56,41 @@ import java.util.List;
 
 public record ProductRequest(
 
-    @NotBlank
-    @Size(max = 200)
-    String title,
+        @NotBlank
+        @Size(max = 200)
+        String title,
 
-    String description,
+        String description,
 
-    @NotNull
-    Integer priceInr,
+        @NotNull
+        Integer priceInr,
 
-    Integer mrpInr,
+        Integer mrpInr,
 
-    @NotNull
-    Integer stock,
+        @NotNull
+        Integer stock,
 
-    @NotNull
-    Long categoryId,
+        @NotNull
+        Long categoryId,
 
-    List<String> images
+        List<String> images,
+
+        String shortHighlights,
+
+        String specificationsJson,
+
+        String featureHighlightsJson,
+
+        String faqJson,
+
+        String warrantyInfo,
+
+        String boxContentsJson,
+
+        String compatibility,
+
+        String demoVideoUrl,
+
+        String pdpBannersJson
 
 ) {}

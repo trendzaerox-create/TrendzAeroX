@@ -1,0 +1,9 @@
+ALTER TABLE products
+ADD COLUMN IF NOT EXISTS short_highlights TEXT,
+ADD COLUMN IF NOT EXISTS specifications_json TEXT,
+ADD COLUMN IF NOT EXISTS feature_highlights_json TEXT,
+ADD COLUMN IF NOT EXISTS faq_json TEXT,
+ADD COLUMN IF NOT EXISTS warranty_info TEXT,
+ADD COLUMN IF NOT EXISTS box_contents_json TEXT,
+ADD COLUMN IF NOT EXISTS compatibility TEXT,
+ADD COLUMN IF NOT EXISTS demo_video_url VARCHAR(1000);
