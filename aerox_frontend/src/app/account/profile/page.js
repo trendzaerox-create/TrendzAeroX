@@ -90,6 +90,23 @@ export default function ProfilePage() {
           </button>
         </div>
 
+
+
+
+        <div style={styles.section}>
+          <h3 style={styles.sectionTitle}>Wishlist</h3>
+
+          <button
+            onClick={() => router.push("/account/wishlist")}
+            style={styles.actionBtn}
+          >
+            Wishlist
+          </button>
+        </div>
+
+
+
+
         <div style={styles.section}>
           <h3 style={styles.sectionTitle}>Addresses</h3>
 

@@ -1,7 +1,4 @@
 
-
-
-
 package com.mydev.ecommerce.product.repository;
 
 import com.mydev.ecommerce.product.model.Product;

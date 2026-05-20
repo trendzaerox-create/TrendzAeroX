@@ -15,6 +15,11 @@ import heroSectionsReducer from "@/features/heroSections/heroSectionSlice";
 import bulkOrderReducer from "@/features/bulkOrders/bulkOrderSlice";
 import newsletterReducer from "@/features/newsletter/newsletterSlice";
 
+import wishlistReducer from "@/features/wishlist/wishlistSlice";
+
+
+
+
 
 export const store = configureStore({
   reducer: {
@@ -33,5 +38,6 @@ export const store = configureStore({
     brandShowcases: brandShowcaseReducer,
     bulkOrders: bulkOrderReducer,
     newsletter: newsletterReducer,
+    wishlist: wishlistReducer,
   },
 });

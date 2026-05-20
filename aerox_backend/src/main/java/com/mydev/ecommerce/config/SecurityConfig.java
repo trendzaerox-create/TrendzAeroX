@@ -85,6 +85,8 @@ public class SecurityConfig {
                 .requestMatchers("/api/cart/**").authenticated()
                 .requestMatchers("/api/giftset-cart/**").authenticated()
 
+                .requestMatchers("/api/wishlist/**").authenticated()
+
                 .requestMatchers("/api/user/**").hasAnyRole("CUSTOMER", "ADMIN")
 
                 .anyRequest().authenticated()
