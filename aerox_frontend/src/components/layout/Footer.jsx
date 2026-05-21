@@ -17,6 +17,7 @@ const trendzWorldLinks = [
   { label: "Blog", href: "/blog" },
   { label: "Our Stores", href: "/stores" },
   { label: "Our Handbags", href: "/products" },
+  { label: "Corporate Order", href: "/bulk-order" },
 ];
 
 const policyLinks = [
@@ -25,6 +26,7 @@ const policyLinks = [
   { label: "Refund Policy", href: "/refund-policy" },
   { label: "Privacy Policy", href: "/privacy-policy" },
   { label: "Shipping Policy", href: "/shipping-policy" },
+  { label: "Warranty Policy", href: "/warranty-policy" },
 ];
 
 const addressInfo = {
@@ -132,7 +134,7 @@ export default function Footer() {
 
           <div className="flex min-w-0 flex-col gap-8 lg:contents">
             <FooterColumn title="Customer Service" links={customerServiceLinks} />
-            <FooterColumn title="Trendz World" links={trendzWorldLinks} />
+            <FooterColumn title="Trendz Aerox" links={trendzWorldLinks} />
             <FooterColumn title="Policies" links={policyLinks} />
           </div>
 

@@ -185,7 +185,6 @@
 
 
 
-
 "use client";
 
 import { useEffect, useState } from "react";
@@ -241,8 +240,8 @@ export default function HeroCarousel() {
   const goToSlide = (index) => setActiveIndex(index);
 
   return (
-    <section className="w-full bg-gradient-to-b from-black via-[#6b6b6b] to-white px-4 py-0 sm:px-6 lg:px-12">
-      <div className="mx-auto max-w-[1180px]">
+    <section className="w-full bg-gradient-to-b from-black via-[#6b6b6b] to-white px-2 py-0 sm:px-5 lg:px-7">
+      <div className="w-full max-w-none">
         <div className="relative h-[430px] w-full overflow-hidden rounded-[18px] bg-black shadow-2xl md:h-[520px]">
           {slides.map((slide, index) => {
             const isActive = activeIndex === index;
@@ -268,7 +267,7 @@ export default function HeroCarousel() {
                 <div className="absolute inset-0 bg-gradient-to-r from-black via-black/75 to-transparent" />
                 <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/20" />
 
-                <div className="absolute inset-0 flex items-center px-7 sm:px-12 md:px-16 lg:px-[180px]">
+                <div className="absolute inset-0 flex items-center px-3 sm:px-4 md:px-7 lg:px-9">
                   <div
                     className={`max-w-[460px] text-left text-white transition-all duration-1000 ${
                       isActive

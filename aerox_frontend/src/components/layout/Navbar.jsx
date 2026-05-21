@@ -56,8 +56,10 @@ export default function Navbar() {
   const navLinks = [
     { href: "/", label: "Home" },
     { href: "/bestsellers", label: "BESTSELLERS" },
-    { href: "/giftsets", label: "GIFTSETS" },
-    { href: "/bulk-order", label: "CORPORATE ORDER" },
+    { href: "/", label: "SMART WATCH" },
+    { href: "/", label: "EARBUDS" },
+    { href: "/giftsets", label: "GIFTBOX" },
+    
   ];
 
   const hoverClass =
