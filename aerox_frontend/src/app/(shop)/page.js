@@ -97,7 +97,7 @@ export default function HomePage() {
       <HeroSectionCustom />
       <TestimonialSection />
       <InstagramCarouselSection />
-      <NewsletterSection />
+      {/* <NewsletterSection /> */}
     </main>
   );
 }
