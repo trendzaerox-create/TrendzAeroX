@@ -142,7 +142,7 @@ export default function Navbar() {
               <img
                 src="/images/logo/TrendzAeroXLogo.png"
                 alt="Trendz AeroX"
-                className="h-[52px] w-auto object-contain transition-all duration-500 ease-out group-hover:scale-[1.05] group-hover:opacity-90 sm:h-[56px]"
+                className="h-[40px] w-auto object-contain transition-all duration-500 ease-out group-hover:scale-[1.05] group-hover:opacity-90 sm:h-[44px]"
               />
             </span>
           </Link>
