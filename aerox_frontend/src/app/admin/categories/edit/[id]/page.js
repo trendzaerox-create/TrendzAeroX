@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { useDispatch, useSelector } from "react-redux";
 import CategoryForm from "@/components/admin/CategoryForm";
@@ -16,6 +16,7 @@ export default function AdminEditCategoryPage() {
   const router = useRouter();
   const params = useParams();
   const dispatch = useDispatch();
+
   const id = params?.id;
 
   const { selectedCategory, loading, submitting, error, successMessage } =
@@ -32,8 +33,40 @@ export default function AdminEditCategoryPage() {
     };
   }, [dispatch, id]);
 
+  const initialValues = useMemo(() => {
+    const category = selectedCategory || {};
+
+    return {
+      name: category.name || "",
+
+      imageUrls:
+        Array.isArray(category.imageUrls) && category.imageUrls.length > 0
+          ? category.imageUrls
+          : category.imageUrl
+          ? [category.imageUrl]
+          : [],
+
+      bannerImageUrls:
+        Array.isArray(category.bannerImageUrls) &&
+        category.bannerImageUrls.length > 0
+          ? category.bannerImageUrls
+          : category.bannerImageUrl
+          ? [category.bannerImageUrl]
+          : [],
+
+      thinBannerImageUrls:
+        Array.isArray(category.thinBannerImageUrls) &&
+        category.thinBannerImageUrls.length > 0
+          ? category.thinBannerImageUrls
+          : category.thinBannerImageUrl
+          ? [category.thinBannerImageUrl]
+          : [],
+    };
+  }, [selectedCategory]);
+
   const handleSubmit = async (payload) => {
     const resultAction = await dispatch(updateCategory({ id, payload }));
+
     if (updateCategory.fulfilled.match(resultAction)) {
       router.push("/admin/categories/list");
     }
@@ -48,11 +81,14 @@ export default function AdminEditCategoryPage() {
               <p className="mb-2 text-xs font-semibold uppercase tracking-[0.2em] text-gray-400">
                 Admin Panel
               </p>
+
               <h1 className="text-3xl font-bold tracking-tight text-gray-900 md:text-4xl">
                 Edit Category
               </h1>
+
               <p className="mt-2 text-sm text-gray-500 md:text-base">
-                Update your category details and keep your store structure organized.
+                Existing images will show by default. You can remove or upload
+                new images.
               </p>
             </div>
 
@@ -79,22 +115,12 @@ export default function AdminEditCategoryPage() {
 
         <div className="overflow-hidden rounded-3xl border border-gray-200 bg-white shadow-sm">
           <div className="border-b border-gray-100 px-6 py-5">
-            <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
-              <div>
-                <h2 className="text-lg font-semibold text-gray-900">
-                  Category Information
-                </h2>
-                <p className="text-sm text-gray-500">
-                  Edit the category name and save your changes.
-                </p>
-              </div>
-
-              {!loading && selectedCategory?.id && (
-                <div className="inline-flex w-fit items-center rounded-full bg-gray-100 px-4 py-2 text-sm font-medium text-gray-700">
-                  Category ID: #{selectedCategory.id}
-                </div>
-              )}
-            </div>
+            <h2 className="text-lg font-semibold text-gray-900">
+              Category Information
+            </h2>
+            <p className="text-sm text-gray-500">
+              Edit category name, image, banner, and thin banner.
+            </p>
           </div>
 
           {loading ? (
@@ -108,26 +134,11 @@ export default function AdminEditCategoryPage() {
             </div>
           ) : (
             <div className="p-6 md:p-8">
-              <div className="mb-6 flex items-center gap-4 rounded-2xl bg-gray-50 p-4">
-                <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-black text-lg font-bold text-white">
-                  {selectedCategory?.name?.charAt(0)?.toUpperCase() || "C"}
-                </div>
-                <div>
-                  <p className="text-sm text-gray-500">Editing category</p>
-                  <h3 className="text-lg font-semibold text-gray-900">
-                    {selectedCategory?.name || "Category"}
-                  </h3>
-                </div>
-              </div>
-
               <CategoryForm
-  initialValues={{
-    name: selectedCategory?.name || "",
-    imageUrl: selectedCategory?.imageUrl || "",
-  }}
-  onSubmit={handleSubmit}
-  loading={submitting}
-/>
+                initialValues={initialValues}
+                onSubmit={handleSubmit}
+                loading={submitting}
+              />
             </div>
           )}
         </div>

@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useEffect } from "react";
@@ -12,6 +13,7 @@ import {
 export default function AdminCreateCategoryPage() {
   const router = useRouter();
   const dispatch = useDispatch();
+
   const { submitting, error, successMessage } = useSelector(
     (state) => state.categories
   );
@@ -22,6 +24,7 @@ export default function AdminCreateCategoryPage() {
 
   const handleSubmit = async (payload) => {
     const resultAction = await dispatch(createCategory(payload));
+
     if (createCategory.fulfilled.match(resultAction)) {
       router.push("/admin/categories/list");
     }
@@ -31,7 +34,9 @@ export default function AdminCreateCategoryPage() {
     <div className="max-w-3xl p-6">
       <div className="mb-6">
         <h1 className="text-3xl font-bold">Create Category</h1>
-        <p className="text-sm text-gray-500">Add a new product category</p>
+        <p className="text-sm text-gray-500">
+          Add category image, banner image, and thin banner image.
+        </p>
       </div>
 
       {error && (
@@ -46,7 +51,16 @@ export default function AdminCreateCategoryPage() {
         </div>
       )}
 
-      <CategoryForm onSubmit={handleSubmit} loading={submitting} />
+      <CategoryForm
+        initialValues={{
+          name: "",
+          imageUrl: "",
+          bannerImageUrl: "",
+          thinBannerImageUrl: "",
+        }}
+        onSubmit={handleSubmit}
+        loading={submitting}
+      />
     </div>
   );
 }

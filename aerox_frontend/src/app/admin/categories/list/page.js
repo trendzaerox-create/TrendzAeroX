@@ -1,9 +1,4 @@
 
-
-
-
-
-
 "use client";
 
 import Link from "next/link";
@@ -50,8 +45,7 @@ export default function AdminCategoryListPage() {
               </h1>
 
               <p className="mt-2 text-sm text-gray-500 md:text-base">
-                Manage your product categories with a clean and organized
-                dashboard.
+                Manage category image, normal banner, and thin banner.
               </p>
             </div>
 
@@ -108,30 +102,9 @@ export default function AdminCategoryListPage() {
             </div>
           ) : adminCategories.length === 0 ? (
             <div className="flex min-h-[260px] flex-col items-center justify-center px-6 py-12 text-center">
-              <div className="mb-4 rounded-full bg-gray-100 p-4">
-                <svg
-                  className="h-8 w-8 text-gray-400"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="1.8"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M3 7.5l9-4 9 4m-18 0l9 4m-9-4v9l9 4m9-13l-9 4m9-4v9l-9 4m0-9v9"
-                  />
-                </svg>
-              </div>
-
               <h3 className="text-lg font-semibold text-gray-900">
                 No categories found
               </h3>
-
-              <p className="mt-2 max-w-md text-sm text-gray-500">
-                You have not created any categories yet. Start by adding your
-                first category.
-              </p>
 
               <Link
                 href="/admin/categories/create"
@@ -153,7 +126,9 @@ export default function AdminCategoryListPage() {
                       Category
                     </th>
 
-                    
+                    <th className="px-6 py-4 text-xs font-semibold uppercase tracking-wide text-gray-500">
+                      Images
+                    </th>
 
                     <th className="px-6 py-4 text-xs font-semibold uppercase tracking-wide text-gray-500">
                       Status
@@ -199,13 +174,28 @@ export default function AdminCategoryListPage() {
                             </p>
 
                             <p className="text-xs text-gray-500">
-                              {category.imageUrl ? "Image added" : "No image"}
+                              Category image
                             </p>
                           </div>
                         </div>
                       </td>
 
-                      
+                      <td className="px-6 py-5">
+                        <div className="flex items-center gap-3">
+                          <ImageStatus
+                            label="Card"
+                            imageUrl={category.imageUrl}
+                          />
+                          <ImageStatus
+                            label="Banner"
+                            imageUrl={category.bannerImageUrl}
+                          />
+                          <ImageStatus
+                            label="Thin"
+                            imageUrl={category.thinBannerImageUrl}
+                          />
+                        </div>
+                      </td>
 
                       <td className="px-6 py-5">
                         <span className="inline-flex items-center rounded-full bg-green-50 px-3 py-1 text-xs font-semibold text-green-700 ring-1 ring-inset ring-green-200">
@@ -239,6 +229,26 @@ export default function AdminCategoryListPage() {
           )}
         </div>
       </div>
+    </div>
+  );
+}
+
+function ImageStatus({ label, imageUrl }) {
+  return (
+    <div className="flex flex-col items-center gap-1">
+      {imageUrl ? (
+        <img
+          src={imageUrl}
+          alt={label}
+          className="h-10 w-16 rounded-lg border border-gray-200 bg-gray-50 object-cover"
+        />
+      ) : (
+        <div className="flex h-10 w-16 items-center justify-center rounded-lg border border-dashed border-gray-300 bg-gray-50 text-[10px] text-gray-400">
+          Empty
+        </div>
+      )}
+
+      <span className="text-[10px] font-medium text-gray-500">{label}</span>
     </div>
   );
 }

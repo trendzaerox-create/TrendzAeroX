@@ -5,10 +5,19 @@
 // import jakarta.validation.constraints.Size;
 
 // public record CategoryRequest(
-//     @NotBlank(message = "Category name is required")
-//     @Size(max = 100, message = "Category name must not exceed 100 characters")
-//     String name
+
+//         @NotBlank(message = "Category name is required")
+//         @Size(max = 100, message = "Category name must not exceed 100 characters")
+//         String name,
+
+//         @Size(max = 500, message = "Category image URL must not exceed 500 characters")
+//         String imageUrl
+
 // ) {}
+
+
+
+
 
 
 
@@ -32,6 +41,12 @@ public record CategoryRequest(
         String name,
 
         @Size(max = 500, message = "Category image URL must not exceed 500 characters")
-        String imageUrl
+        String imageUrl,
+
+        @Size(max = 500, message = "Category banner image URL must not exceed 500 characters")
+        String bannerImageUrl,
+
+        @Size(max = 500, message = "Category thin banner image URL must not exceed 500 characters")
+        String thinBannerImageUrl
 
 ) {}

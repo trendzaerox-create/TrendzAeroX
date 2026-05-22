@@ -1,218 +1,3 @@
-
-
-
-
-// "use client";
-
-// import { useEffect } from "react";
-// import { useDispatch, useSelector } from "react-redux";
-// import Link from "next/link";
-
-// import { fetchProducts } from "../../../features/products/productSlice";
-
-// export default function ProductsPage() {
-
-//   const dispatch = useDispatch();
-//   const products = useSelector(state => state.products.items) || [];
-
-//   useEffect(() => {
-//     dispatch(fetchProducts());
-//   }, [dispatch]);
-
-//   // ⭐ Calculate average rating
-//   const getRatingData = (reviews) => {
-//     if (!reviews || reviews.length === 0) {
-//       return { avg: 0, count: 0 };
-//     }
-
-//     const total = reviews.reduce((sum, r) => sum + r.rating, 0);
-//     const avg = total / reviews.length;
-
-//     return {
-//       avg: avg,
-//       count: reviews.length
-//     };
-//   };
-
-//   // ⭐ Render stars (Amazon style)
-//   const renderStars = (avg) => {
-//     const full = Math.round(avg);
-
-//     return (
-//       <span style={{ color: "#f59e0b", fontSize: "14px" }}>
-//         {"★".repeat(full)}
-//         {"☆".repeat(5 - full)}
-//       </span>
-//     );
-//   };
-
-//   return (
-
-//     <div style={{ padding: "40px" }}>
-
-//       <h1>Products</h1>
-
-//       <div
-//         style={{
-//           display: "grid",
-//           gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
-//           gap: "20px",
-//           marginTop: "20px"
-//         }}
-//       >
-
-//         {products.map((p) => {
-
-//           const firstImage = p.images?.[0];
-//           const { avg, count } = getRatingData(p.reviews);
-
-//           return (
-
-//             <Link
-//               key={p.id}
-//               href={`/product/${p.id}`}
-//               style={{
-//                 textDecoration: "none",
-//                 color: "inherit"
-//               }}
-//             >
-
-//               <div
-//                 style={{
-//                   border: "1px solid #ddd",
-//                   padding: "12px",
-//                   borderRadius: "8px",
-//                   background: "#fff",
-//                   cursor: "pointer"
-//                 }}
-//               >
-
-//                 {/* IMAGE */}
-
-//                 {firstImage ? (
-
-//                   <img
-//                     src={
-//                       firstImage.startsWith("http")
-//                         ? firstImage
-//                         : `${process.env.NEXT_PUBLIC_API_BASE}${firstImage}`
-//                     }
-//                     alt={p.title}
-//                     style={{
-//                       width: "100%",
-//                       height: "200px",
-//                       objectFit: "cover",
-//                       borderRadius: "6px",
-//                       marginBottom: "10px"
-//                     }}
-//                   />
-
-//                 ) : (
-
-//                   <div
-//                     style={{
-//                       width: "100%",
-//                       height: "200px",
-//                       background: "#f5f5f5",
-//                       display: "flex",
-//                       alignItems: "center",
-//                       justifyContent: "center",
-//                       borderRadius: "6px",
-//                       marginBottom: "10px"
-//                     }}
-//                   >
-//                     No Image
-//                   </div>
-
-//                 )}
-
-//                 {/* PRODUCT INFO */}
-
-//                 <h3 style={{ marginBottom: "6px" }}>{p.title}</h3>
-
-//                 {/* ⭐ RATING */}
-
-//                 <div style={{ display: "flex", alignItems: "center", gap: "6px", marginBottom: "6px" }}>
-//                   {renderStars(avg)}
-//                   <span style={{ fontSize: "13px", color: "#555" }}>
-//                     ({count})
-//                   </span>
-//                 </div>
-
-//                 <p style={{ fontWeight: "bold" }}>
-//                   ₹ {p.priceInr}
-//                 </p>
-
-//                 <p>Stock: {p.stock}</p>
-
-//                 <p style={{ color: "#777" }}>
-//                   Category: {p.category}
-//                 </p>
-
-//               </div>
-
-//             </Link>
-
-//           );
-
-//         })}
-
-//       </div>
-
-//     </div>
-
-//   );
-// }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
@@ -263,6 +48,13 @@ export default function ProductsPage() {
     );
   }, [categories, categoryId]);
 
+  const getCategoryName = (product) => {
+    if (product.category?.name) return product.category.name;
+    if (typeof product.category === "string") return product.category;
+    if (selectedCategory?.name) return selectedCategory.name;
+    return "Trendz AeroX";
+  };
+
   const isSameCategory = (product) => {
     if (!categoryId) return true;
 
@@ -304,23 +96,66 @@ export default function ProductsPage() {
     <div className="grid grid-cols-2 gap-4 sm:grid-cols-2 sm:gap-5 lg:grid-cols-3 xl:grid-cols-4">
       {items.map((product) => (
         <div key={product.id} className="h-full">
-          <ProductCard product={product} />
+          <ProductCard
+            product={{
+              ...product,
+              displayCategoryName: getCategoryName(product),
+            }}
+          />
         </div>
       ))}
     </div>
   );
 
   return (
-    <main className="min-h-screen bg-white px-4 py-10 sm:px-6 lg:px-8">
-      <div className="mx-auto max-w-[1280px]">
-        <div className="mb-8">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-neutral-500">
-            Trendz AeroX
-          </p>
+    <main className="min-h-screen bg-white py-10">
+      {selectedCategory?.thinBannerImageUrl && (
+        <div className="mb-6 w-full overflow-hidden bg-neutral-100">
+          <img
+            src={selectedCategory.thinBannerImageUrl}
+            alt={`${selectedCategory.name} thin banner`}
+            className="h-[90px] w-full object-cover sm:h-[120px]"
+          />
+        </div>
+      )}
 
-          <h1 className="mt-3 text-[28px] font-semibold tracking-[-0.03em] text-black sm:text-[34px]">
-            {selectedCategory ? selectedCategory.name : "Products"}
-          </h1>
+      {selectedCategory?.bannerImageUrl && (
+        <div className="mb-8 w-full overflow-hidden bg-neutral-100 shadow-[0_14px_35px_rgba(0,0,0,0.08)]">
+          <img
+            src={selectedCategory.bannerImageUrl}
+            alt={`${selectedCategory.name} banner`}
+            className="h-[180px] w-full object-cover sm:h-[260px] lg:h-[340px]"
+          />
+        </div>
+      )}
+
+      <div className="mx-auto max-w-[1280px] px-4 sm:px-6 lg:px-8">
+        <div className="mb-8 flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex items-center gap-4">
+            {selectedCategory?.imageUrl && (
+              <img
+                src={selectedCategory.imageUrl}
+                alt={selectedCategory.name}
+                className="h-16 w-16 rounded-2xl border border-neutral-200 bg-neutral-100 object-cover"
+              />
+            )}
+
+            <div>
+              <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-neutral-500">
+                Trendz AeroX
+              </p>
+
+              <h1 className="mt-2 text-[28px] font-semibold tracking-[-0.03em] text-black sm:text-[34px]">
+                {selectedCategory ? selectedCategory.name : "Products"}
+              </h1>
+
+              {selectedCategory && (
+                <p className="mt-1 text-sm text-neutral-500">
+                  {selectedCategoryProducts.length} products available
+                </p>
+              )}
+            </div>
+          </div>
         </div>
 
         {loading && (
