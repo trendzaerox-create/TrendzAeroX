@@ -1,3 +1,4 @@
+
 // package com.mydev.ecommerce.category.controller;
 
 // import com.mydev.ecommerce.category.dto.CategoryRequest;
@@ -11,6 +12,7 @@
 // import org.springframework.web.server.ResponseStatusException;
 
 // import java.io.IOException;
+// import java.util.Comparator;
 // import java.util.List;
 // import java.util.Map;
 
@@ -31,7 +33,10 @@
 
 //     @GetMapping
 //     public List<Category> list() {
-//         return repo.findAll();
+//         return repo.findAll()
+//                 .stream()
+//                 .sorted(Comparator.comparing(Category::getId))
+//                 .toList();
 //     }
 
 //     @GetMapping("/{id}")
@@ -43,53 +48,48 @@
 //                 ));
 //     }
 
-//     @PostMapping("/upload-image")
-//     public Map<String, String> uploadCategoryImage(
-//             @RequestParam("file") MultipartFile file
-//     ) throws IOException {
+// @PostMapping
+// @ResponseStatus(HttpStatus.CREATED)
+// public Category create(@Valid @RequestBody CategoryRequest req) {
+//     Category c = new Category();
 
-//         FileStorageService.UploadResult result =
-//                 fileStorageService.saveCategoryFile(file);
+//     c.setName(req.name().trim());
+//     c.setImageUrls(cleanList(req.imageUrls()));
+//     c.setBannerImageUrls(cleanList(req.bannerImageUrls()));
+//     c.setThinBannerImageUrls(cleanList(req.thinBannerImageUrls()));
 
-//         return Map.of(
-//                 "imageUrl", result.imageUrl()
-//         );
+//     return repo.save(c);
+// }
+
+// @PutMapping("/{id}")
+// public Category update(
+//         @PathVariable Long id,
+//         @Valid @RequestBody CategoryRequest req
+// ) {
+//     Category c = repo.findById(id)
+//             .orElseThrow(() -> new ResponseStatusException(
+//                     HttpStatus.NOT_FOUND,
+//                     "Category not found"
+//             ));
+
+//     c.setName(req.name().trim());
+//     c.setImageUrls(cleanList(req.imageUrls()));
+//     c.setBannerImageUrls(cleanList(req.bannerImageUrls()));
+//     c.setThinBannerImageUrls(cleanList(req.thinBannerImageUrls()));
+
+//     return repo.save(c);
+// }
+
+// private List<String> cleanList(List<String> values) {
+//     if (values == null) {
+//         return List.of();
 //     }
 
-//     @PostMapping
-//     @ResponseStatus(HttpStatus.CREATED)
-//     public Category create(@Valid @RequestBody CategoryRequest req) {
-//         Category c = new Category();
-//         c.setName(req.name().trim());
-
-//         if (req.imageUrl() != null && !req.imageUrl().isBlank()) {
-//             c.setImageUrl(req.imageUrl().trim());
-//         }
-
-//         return repo.save(c);
-//     }
-
-//     @PutMapping("/{id}")
-//     public Category update(
-//             @PathVariable Long id,
-//             @Valid @RequestBody CategoryRequest req
-//     ) {
-//         Category c = repo.findById(id)
-//                 .orElseThrow(() -> new ResponseStatusException(
-//                         HttpStatus.NOT_FOUND,
-//                         "Category not found"
-//                 ));
-
-//         c.setName(req.name().trim());
-
-//         if (req.imageUrl() != null && !req.imageUrl().isBlank()) {
-//             c.setImageUrl(req.imageUrl().trim());
-//         } else {
-//             c.setImageUrl(null);
-//         }
-
-//         return repo.save(c);
-//     }
+//     return values.stream()
+//             .filter(value -> value != null && !value.isBlank())
+//             .map(String::trim)
+//             .toList();
+// }
 
 //     @DeleteMapping("/{id}")
 //     @ResponseStatus(HttpStatus.NO_CONTENT)
@@ -102,11 +102,13 @@
 
 //         repo.delete(c);
 //     }
+
+//     private String clean(String value) {
+//         return value != null && !value.isBlank()
+//                 ? value.trim()
+//                 : null;
+//     }
 // }
-
-
-
-
 
 
 
@@ -172,17 +174,47 @@ public class AdminCategoryController {
                 ));
     }
 
-    @PostMapping("/upload-image")
-    public Map<String, String> uploadCategoryImage(
-            @RequestParam("file") MultipartFile file
-    ) throws IOException {
+    @PostMapping("/upload-images")
+    public Map<String, List<String>> uploadImages(
+            @RequestParam("files") List<MultipartFile> files
+    ) {
+        if (files == null || files.isEmpty()) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "No files selected"
+            );
+        }
 
-        FileStorageService.UploadResult result =
-                fileStorageService.saveCategoryFile(file);
+        try {
+            List<String> urls = files.stream()
+                    .filter(file -> file != null && !file.isEmpty())
+                    .map(file -> {
+                        try {
+                            return fileStorageService.saveCategoryFile(file).imageUrl();
+                        } catch (IOException e) {
+                            throw new RuntimeException(e);
+                        }
+                    })
+                    .toList();
 
-        return Map.of(
-                "imageUrl", result.imageUrl()
-        );
+            if (urls.isEmpty()) {
+                throw new ResponseStatusException(
+                        HttpStatus.BAD_REQUEST,
+                        "No valid files selected"
+                );
+            }
+
+            return Map.of("urls", urls);
+
+        } catch (ResponseStatusException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new ResponseStatusException(
+                    HttpStatus.INTERNAL_SERVER_ERROR,
+                    "Failed to upload category images: " + e.getMessage(),
+                    e
+            );
+        }
     }
 
     @PostMapping
@@ -191,10 +223,9 @@ public class AdminCategoryController {
         Category c = new Category();
 
         c.setName(req.name().trim());
-
-        c.setImageUrl(clean(req.imageUrl()));
-        c.setBannerImageUrl(clean(req.bannerImageUrl()));
-        c.setThinBannerImageUrl(clean(req.thinBannerImageUrl()));
+        c.setImageUrls(cleanList(req.imageUrls()));
+        c.setBannerImageUrls(cleanList(req.bannerImageUrls()));
+        c.setThinBannerImageUrls(cleanList(req.thinBannerImageUrls()));
 
         return repo.save(c);
     }
@@ -211,10 +242,9 @@ public class AdminCategoryController {
                 ));
 
         c.setName(req.name().trim());
-
-        c.setImageUrl(clean(req.imageUrl()));
-        c.setBannerImageUrl(clean(req.bannerImageUrl()));
-        c.setThinBannerImageUrl(clean(req.thinBannerImageUrl()));
+        c.setImageUrls(cleanList(req.imageUrls()));
+        c.setBannerImageUrls(cleanList(req.bannerImageUrls()));
+        c.setThinBannerImageUrls(cleanList(req.thinBannerImageUrls()));
 
         return repo.save(c);
     }
@@ -231,9 +261,14 @@ public class AdminCategoryController {
         repo.delete(c);
     }
 
-    private String clean(String value) {
-        return value != null && !value.isBlank()
-                ? value.trim()
-                : null;
+    private List<String> cleanList(List<String> values) {
+        if (values == null) {
+            return List.of();
+        }
+
+        return values.stream()
+                .filter(value -> value != null && !value.isBlank())
+                .map(String::trim)
+                .toList();
     }
 }

@@ -1,3 +1,6 @@
+
+
+
 "use client";
 
 import Link from "next/link";
@@ -11,6 +14,18 @@ import {
   clearCategoryState,
   clearSelectedCategory,
 } from "@/features/categories/categorySlice";
+
+function normalizeArray(value, fallbackValue) {
+  if (Array.isArray(value) && value.length > 0) {
+    return value;
+  }
+
+  if (typeof fallbackValue === "string" && fallbackValue.trim()) {
+    return [fallbackValue.trim()];
+  }
+
+  return [];
+}
 
 export default function AdminEditCategoryPage() {
   const router = useRouter();
@@ -39,28 +54,17 @@ export default function AdminEditCategoryPage() {
     return {
       name: category.name || "",
 
-      imageUrls:
-        Array.isArray(category.imageUrls) && category.imageUrls.length > 0
-          ? category.imageUrls
-          : category.imageUrl
-          ? [category.imageUrl]
-          : [],
+      imageUrls: normalizeArray(category.imageUrls, category.imageUrl),
 
-      bannerImageUrls:
-        Array.isArray(category.bannerImageUrls) &&
-        category.bannerImageUrls.length > 0
-          ? category.bannerImageUrls
-          : category.bannerImageUrl
-          ? [category.bannerImageUrl]
-          : [],
+      bannerImageUrls: normalizeArray(
+        category.bannerImageUrls,
+        category.bannerImageUrl
+      ),
 
-      thinBannerImageUrls:
-        Array.isArray(category.thinBannerImageUrls) &&
-        category.thinBannerImageUrls.length > 0
-          ? category.thinBannerImageUrls
-          : category.thinBannerImageUrl
-          ? [category.thinBannerImageUrl]
-          : [],
+      thinBannerImageUrls: normalizeArray(
+        category.thinBannerImageUrls,
+        category.thinBannerImageUrl
+      ),
     };
   }, [selectedCategory]);
 
@@ -88,7 +92,7 @@ export default function AdminEditCategoryPage() {
 
               <p className="mt-2 text-sm text-gray-500 md:text-base">
                 Existing images will show by default. You can remove or upload
-                new images.
+                new images separately.
               </p>
             </div>
 
@@ -119,7 +123,7 @@ export default function AdminEditCategoryPage() {
               Category Information
             </h2>
             <p className="text-sm text-gray-500">
-              Edit category name, image, banner, and thin banner.
+              Edit category name, images, banners, and thin banners.
             </p>
           </div>
 

@@ -1,38 +1,9 @@
-
-// package com.mydev.ecommerce.category.dto;
-
-// import jakarta.validation.constraints.NotBlank;
-// import jakarta.validation.constraints.Size;
-
-// public record CategoryRequest(
-
-//         @NotBlank(message = "Category name is required")
-//         @Size(max = 100, message = "Category name must not exceed 100 characters")
-//         String name,
-
-//         @Size(max = 500, message = "Category image URL must not exceed 500 characters")
-//         String imageUrl
-
-// ) {}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 package com.mydev.ecommerce.category.dto;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
+
+import java.util.List;
 
 public record CategoryRequest(
 
@@ -40,13 +11,10 @@ public record CategoryRequest(
         @Size(max = 100, message = "Category name must not exceed 100 characters")
         String name,
 
-        @Size(max = 500, message = "Category image URL must not exceed 500 characters")
-        String imageUrl,
+        List<@Size(max = 500, message = "Category image URL must not exceed 500 characters") String> imageUrls,
 
-        @Size(max = 500, message = "Category banner image URL must not exceed 500 characters")
-        String bannerImageUrl,
+        List<@Size(max = 500, message = "Category banner image URL must not exceed 500 characters") String> bannerImageUrls,
 
-        @Size(max = 500, message = "Category thin banner image URL must not exceed 500 characters")
-        String thinBannerImageUrl
+        List<@Size(max = 500, message = "Category thin banner image URL must not exceed 500 characters") String> thinBannerImageUrls
 
 ) {}

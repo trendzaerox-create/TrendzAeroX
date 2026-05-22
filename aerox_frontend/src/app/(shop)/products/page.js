@@ -1,3 +1,458 @@
+// "use client";
+
+// import { useEffect, useMemo, useState } from "react";
+// import { useSearchParams } from "next/navigation";
+
+// import ProductCard from "@/components/ProductCard";
+// import api from "@/lib/apiClient";
+
+// function normalizeImageList(value) {
+//   if (!value) return [];
+
+//   if (Array.isArray(value)) {
+//     return value.filter(Boolean);
+//   }
+
+//   if (typeof value === "string") {
+//     return value
+//       .split(",")
+//       .map((item) => item.trim())
+//       .filter(Boolean);
+//   }
+
+//   return [];
+// }
+
+// function BannerCarousel({
+//   images = [],
+//   alt = "Category banner",
+//   type = "banner",
+// }) {
+//   const [activeIndex, setActiveIndex] = useState(0);
+
+//   const validImages = useMemo(() => normalizeImageList(images), [images]);
+
+//   useEffect(() => {
+//     if (validImages.length <= 1) return;
+
+//     const interval = setInterval(() => {
+//       setActiveIndex((prev) => (prev + 1) % validImages.length);
+//     }, 3500);
+
+//     return () => clearInterval(interval);
+//   }, [validImages.length]);
+
+//   useEffect(() => {
+//     setActiveIndex(0);
+//   }, [validImages.join("|")]);
+
+//   if (validImages.length === 0) return null;
+
+//   const isThin = type === "thin";
+
+//   return (
+//     <div
+//       className={`relative w-full overflow-hidden bg-neutral-100 ${
+//         isThin
+//           ? "mt-10"
+//           : "mb-8 shadow-[0_14px_35px_rgba(0,0,0,0.08)]"
+//       }`}
+//     >
+//       <div
+//         className="flex transition-transform duration-700 ease-out"
+//         style={{ transform: `translateX(-${activeIndex * 100}%)` }}
+//       >
+//         {validImages.map((image, index) => (
+//           <img
+//             key={`${image}-${index}`}
+//             src={image}
+//             alt={`${alt} ${index + 1}`}
+//             className={`w-full shrink-0 object-cover ${
+//               isThin
+//                 ? "h-[90px] sm:h-[120px]"
+//                 : "h-[180px] sm:h-[260px] lg:h-[340px]"
+//             }`}
+//           />
+//         ))}
+//       </div>
+
+//       {validImages.length > 1 && (
+//         <div
+//           className={`absolute left-1/2 z-10 flex -translate-x-1/2 items-center gap-2 ${
+//             isThin ? "bottom-2" : "bottom-4"
+//           }`}
+//         >
+//           {validImages.map((_, index) => (
+//             <button
+//               key={index}
+//               type="button"
+//               onClick={() => setActiveIndex(index)}
+//               className={`h-1.5 rounded-full transition-all ${
+//                 activeIndex === index
+//                   ? "w-6 bg-black"
+//                   : "w-1.5 bg-white/80"
+//               }`}
+//               aria-label={`Go to banner ${index + 1}`}
+//             />
+//           ))}
+//         </div>
+//       )}
+//     </div>
+//   );
+// }
+
+// export default function ProductsPage() {
+//   const searchParams = useSearchParams();
+//   const categoryId = searchParams.get("categoryId");
+
+//   const [products, setProducts] = useState([]);
+//   const [categories, setCategories] = useState([]);
+//   const [loading, setLoading] = useState(true);
+//   const [error, setError] = useState("");
+
+//   useEffect(() => {
+//     async function loadData() {
+//       try {
+//         setLoading(true);
+//         setError("");
+
+//         const [productsRes, categoriesRes] = await Promise.all([
+//           api.get("/api/products"),
+//           api.get("/api/categories"),
+//         ]);
+
+//         setProducts(Array.isArray(productsRes.data) ? productsRes.data : []);
+//         setCategories(
+//           Array.isArray(categoriesRes.data) ? categoriesRes.data : []
+//         );
+//       } catch (err) {
+//         setError(err.response?.data?.message || "Failed to fetch products");
+//         setProducts([]);
+//         setCategories([]);
+//       } finally {
+//         setLoading(false);
+//       }
+//     }
+
+//     loadData();
+//   }, []);
+
+//   const selectedCategory = useMemo(() => {
+//     if (!categoryId) return null;
+
+//     return categories.find(
+//       (category) => Number(category.id) === Number(categoryId)
+//     );
+//   }, [categories, categoryId]);
+
+//   const getProductCategoryId = (product) => {
+//     if (product.categoryId) return Number(product.categoryId);
+//     if (product.category?.id) return Number(product.category.id);
+//     return null;
+//   };
+
+//   const getCategoryByProduct = (product) => {
+//     const productCategoryId = getProductCategoryId(product);
+
+//     if (productCategoryId) {
+//       const matchedCategory = categories.find(
+//         (category) => Number(category.id) === Number(productCategoryId)
+//       );
+
+//       if (matchedCategory) return matchedCategory;
+//     }
+
+//     if (typeof product.category === "string") {
+//       const matchedCategory = categories.find(
+//         (category) =>
+//           category.name?.trim().toLowerCase() ===
+//           product.category.trim().toLowerCase()
+//       );
+
+//       if (matchedCategory) return matchedCategory;
+//     }
+
+//     if (typeof product.category?.name === "string") {
+//       const matchedCategory = categories.find(
+//         (category) =>
+//           category.name?.trim().toLowerCase() ===
+//           product.category.name.trim().toLowerCase()
+//       );
+
+//       if (matchedCategory) return matchedCategory;
+//     }
+
+//     return null;
+//   };
+
+//   const getCategoryName = (product) => {
+//     const productCategory = getCategoryByProduct(product);
+
+//     if (productCategory?.name) return productCategory.name;
+//     if (product.category?.name) return product.category.name;
+//     if (typeof product.category === "string") return product.category;
+//     if (selectedCategory?.name) return selectedCategory.name;
+
+//     return "Trendz AeroX";
+//   };
+
+//   const doesProductBelongToCategory = (product, category) => {
+//     if (!product || !category) return false;
+
+//     const productCategoryId = getProductCategoryId(product);
+
+//     if (productCategoryId && Number(productCategoryId) === Number(category.id)) {
+//       return true;
+//     }
+
+//     if (
+//       typeof product.category === "string" &&
+//       product.category.trim().toLowerCase() ===
+//         category.name?.trim().toLowerCase()
+//     ) {
+//       return true;
+//     }
+
+//     if (
+//       typeof product.category?.name === "string" &&
+//       product.category.name.trim().toLowerCase() ===
+//         category.name?.trim().toLowerCase()
+//     ) {
+//       return true;
+//     }
+
+//     return false;
+//   };
+
+//   const selectedCategoryProducts = useMemo(() => {
+//     if (!categoryId) return products;
+
+//     if (!selectedCategory) return [];
+
+//     return products.filter((product) =>
+//       doesProductBelongToCategory(product, selectedCategory)
+//     );
+//   }, [products, categoryId, selectedCategory, categories]);
+
+//   const otherCategorySections = useMemo(() => {
+//     if (!categoryId) return [];
+
+//     return categories
+//       .filter((category) => Number(category.id) !== Number(categoryId))
+//       .map((category) => {
+//         const items = products.filter((product) =>
+//           doesProductBelongToCategory(product, category)
+//         );
+
+//         return {
+//           category,
+//           items,
+//         };
+//       })
+//       .filter((section) => section.items.length > 0);
+//   }, [products, categories, categoryId]);
+
+//   const getBannerImages = (category) => {
+//     if (!category) return [];
+
+//     return [
+//       ...normalizeImageList(category.bannerImageUrls),
+//       ...normalizeImageList(category.bannerImages),
+//       ...normalizeImageList(category.banners),
+//       ...normalizeImageList(category.bannerImageUrl),
+//     ];
+//   };
+
+//   const getThinBannerImages = (category) => {
+//     if (!category) return [];
+
+//     return [
+//       ...normalizeImageList(category.thinBannerImageUrls),
+//       ...normalizeImageList(category.thinBannerImages),
+//       ...normalizeImageList(category.thinBanners),
+//       ...normalizeImageList(category.thinBannerImageUrl),
+//     ];
+//   };
+
+//   const renderGrid = (items) => (
+//     <div className="grid grid-cols-2 gap-4 sm:grid-cols-2 sm:gap-5 lg:grid-cols-3 xl:grid-cols-4">
+//       {items.map((product) => (
+//         <div key={product.id} className="h-full">
+//           <ProductCard
+//             product={{
+//               ...product,
+//               displayCategoryName: getCategoryName(product),
+//             }}
+//           />
+//         </div>
+//       ))}
+//     </div>
+//   );
+
+//   const renderCategoryHeader = (category, count) => {
+//     if (!category) return null;
+
+//     return (
+//       <div className="mb-8 flex items-center gap-4">
+//         {category?.imageUrl && (
+//           <img
+//             src={category.imageUrl}
+//             alt={category.name}
+//             className="h-16 w-16 rounded-2xl border border-neutral-200 bg-neutral-100 object-cover"
+//           />
+//         )}
+
+//         <div>
+//           <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-neutral-500">
+//             Trendz AeroX
+//           </p>
+
+//           <h1 className="mt-2 text-[28px] font-semibold tracking-[-0.03em] text-black sm:text-[34px]">
+//             {category.name}
+//           </h1>
+
+//           <p className="mt-1 text-sm text-neutral-500">
+//             {count} products available
+//           </p>
+//         </div>
+//       </div>
+//     );
+//   };
+
+//   const renderCategoryBanner = (category) => {
+//     const images = getBannerImages(category);
+
+//     if (images.length === 0) return null;
+
+//     return (
+//       <BannerCarousel
+//         images={images}
+//         alt={`${category?.name || "Category"} banner`}
+//         type="banner"
+//       />
+//     );
+//   };
+
+//   const renderThinBanner = (category) => {
+//     const images = getThinBannerImages(category);
+
+//     if (images.length === 0) return null;
+
+//     return (
+//       <BannerCarousel
+//         images={images}
+//         alt={`${category?.name || "Category"} thin banner`}
+//         type="thin"
+//       />
+//     );
+//   };
+
+//   const hasTopBanner = getBannerImages(selectedCategory).length > 0;
+
+//   return (
+//     <main className="min-h-screen bg-white pb-10">
+//       {/* Selected category banner carousel */}
+//       {renderCategoryBanner(selectedCategory)}
+
+//       {/* Selected category products */}
+//       <section
+//         className={`mx-auto max-w-[1280px] px-4 sm:px-6 lg:px-8 ${
+//           hasTopBanner ? "" : "pt-10"
+//         }`}
+//       >
+//         {selectedCategory ? (
+//           renderCategoryHeader(
+//             selectedCategory,
+//             selectedCategoryProducts.length
+//           )
+//         ) : (
+//           <div className="mb-8">
+//             <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-neutral-500">
+//               Trendz AeroX
+//             </p>
+
+//             <h1 className="mt-2 text-[28px] font-semibold tracking-[-0.03em] text-black sm:text-[34px]">
+//               Products
+//             </h1>
+//           </div>
+//         )}
+
+//         {loading && (
+//           <p className="text-sm text-neutral-500">Loading products...</p>
+//         )}
+
+//         {error && <p className="text-sm text-red-600">{error}</p>}
+
+//         {!loading && selectedCategoryProducts.length === 0 ? (
+//           <div className="rounded-[24px] border border-neutral-200 bg-[#fafafa] px-6 py-14 text-center text-[15px] text-neutral-500 shadow-[0_12px_30px_rgba(0,0,0,0.03)]">
+//             No products found.
+//           </div>
+//         ) : (
+//           !loading && renderGrid(selectedCategoryProducts)
+//         )}
+//       </section>
+
+//       {/* Selected category thin banner carousel */}
+//       {renderThinBanner(selectedCategory)}
+
+//       {/* Other categories: banner carousel -> products -> thin banner carousel */}
+//       {!loading && categoryId && otherCategorySections.length > 0 && (
+//         <section className="mt-14">
+//           <div className="mx-auto max-w-[1280px] px-4 sm:px-6 lg:px-8">
+//             <div className="mb-6">
+//               <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-neutral-500">
+//                 More Collection
+//               </p>
+
+//               <h2 className="mt-3 text-[24px] font-semibold tracking-[-0.03em] text-black sm:text-[30px]">
+//                 Other Products You May Like
+//               </h2>
+//             </div>
+//           </div>
+
+//           {otherCategorySections.map(({ category, items }) => (
+//             <div key={category.id || category.name} className="mt-10">
+//               {/* Other category banner carousel */}
+//               {renderCategoryBanner(category)}
+
+//               {/* Other category products */}
+//               <div className="mx-auto max-w-[1280px] px-4 sm:px-6 lg:px-8">
+//                 {renderCategoryHeader(category, items.length)}
+
+//                 {renderGrid(items)}
+//               </div>
+
+//               {/* Other category thin banner carousel */}
+//               {renderThinBanner(category)}
+//             </div>
+//           ))}
+//         </section>
+//       )}
+//     </main>
+//   );
+// }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
@@ -5,6 +460,104 @@ import { useSearchParams } from "next/navigation";
 
 import ProductCard from "@/components/ProductCard";
 import api from "@/lib/apiClient";
+
+const END_STATIC_BANNER_URL =
+  "https://t4.ftcdn.net/jpg/01/99/07/97/360_F_199079722_wxjZlTjvzMx9KF2kXReaKtePZwJXjfRW.jpg";
+
+function normalizeImageList(value) {
+  if (!value) return [];
+
+  if (Array.isArray(value)) {
+    return value.filter(Boolean);
+  }
+
+  if (typeof value === "string") {
+    return value
+      .split(",")
+      .map((item) => item.trim())
+      .filter(Boolean);
+  }
+
+  return [];
+}
+
+function BannerCarousel({
+  images = [],
+  alt = "Category banner",
+  type = "banner",
+}) {
+  const [activeIndex, setActiveIndex] = useState(0);
+
+  const validImages = useMemo(() => normalizeImageList(images), [images]);
+
+  useEffect(() => {
+    if (validImages.length <= 1) return;
+
+    const interval = setInterval(() => {
+      setActiveIndex((prev) => (prev + 1) % validImages.length);
+    }, 3500);
+
+    return () => clearInterval(interval);
+  }, [validImages.length]);
+
+  useEffect(() => {
+    setActiveIndex(0);
+  }, [validImages.join("|")]);
+
+  if (validImages.length === 0) return null;
+
+  const isThin = type === "thin";
+
+  return (
+    <div
+      className={`relative w-full overflow-hidden bg-neutral-100 ${
+        isThin
+          ? "mt-10"
+          : "mb-8 shadow-[0_14px_35px_rgba(0,0,0,0.08)]"
+      }`}
+    >
+      <div
+        className="flex transition-transform duration-700 ease-out"
+        style={{ transform: `translateX(-${activeIndex * 100}%)` }}
+      >
+        {validImages.map((image, index) => (
+          <img
+            key={`${image}-${index}`}
+            src={image}
+            alt={`${alt} ${index + 1}`}
+            className={`w-full shrink-0 object-cover ${
+              isThin
+                ? "h-[90px] sm:h-[120px]"
+                : "h-[180px] sm:h-[260px] lg:h-[340px]"
+            }`}
+          />
+        ))}
+      </div>
+
+      {validImages.length > 1 && (
+        <div
+          className={`absolute left-1/2 z-10 flex -translate-x-1/2 items-center gap-2 ${
+            isThin ? "bottom-2" : "bottom-4"
+          }`}
+        >
+          {validImages.map((_, index) => (
+            <button
+              key={index}
+              type="button"
+              onClick={() => setActiveIndex(index)}
+              className={`h-1.5 rounded-full transition-all ${
+                activeIndex === index
+                  ? "w-6 bg-black"
+                  : "w-1.5 bg-white/80"
+              }`}
+              aria-label={`Go to banner ${index + 1}`}
+            />
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
 
 export default function ProductsPage() {
   const searchParams = useSearchParams();
@@ -27,7 +580,9 @@ export default function ProductsPage() {
         ]);
 
         setProducts(Array.isArray(productsRes.data) ? productsRes.data : []);
-        setCategories(Array.isArray(categoriesRes.data) ? categoriesRes.data : []);
+        setCategories(
+          Array.isArray(categoriesRes.data) ? categoriesRes.data : []
+        );
       } catch (err) {
         setError(err.response?.data?.message || "Failed to fetch products");
         setProducts([]);
@@ -48,33 +603,78 @@ export default function ProductsPage() {
     );
   }, [categories, categoryId]);
 
+  const getProductCategoryId = (product) => {
+    if (product.categoryId) return Number(product.categoryId);
+    if (product.category?.id) return Number(product.category.id);
+    return null;
+  };
+
+  const getCategoryByProduct = (product) => {
+    const productCategoryId = getProductCategoryId(product);
+
+    if (productCategoryId) {
+      const matchedCategory = categories.find(
+        (category) => Number(category.id) === Number(productCategoryId)
+      );
+
+      if (matchedCategory) return matchedCategory;
+    }
+
+    if (typeof product.category === "string") {
+      const matchedCategory = categories.find(
+        (category) =>
+          category.name?.trim().toLowerCase() ===
+          product.category.trim().toLowerCase()
+      );
+
+      if (matchedCategory) return matchedCategory;
+    }
+
+    if (typeof product.category?.name === "string") {
+      const matchedCategory = categories.find(
+        (category) =>
+          category.name?.trim().toLowerCase() ===
+          product.category.name.trim().toLowerCase()
+      );
+
+      if (matchedCategory) return matchedCategory;
+    }
+
+    return null;
+  };
+
   const getCategoryName = (product) => {
+    const productCategory = getCategoryByProduct(product);
+
+    if (productCategory?.name) return productCategory.name;
     if (product.category?.name) return product.category.name;
     if (typeof product.category === "string") return product.category;
     if (selectedCategory?.name) return selectedCategory.name;
+
     return "Trendz AeroX";
   };
 
-  const isSameCategory = (product) => {
-    if (!categoryId) return true;
+  const doesProductBelongToCategory = (product, category) => {
+    if (!product || !category) return false;
 
-    if (Number(product.categoryId) === Number(categoryId)) return true;
-    if (Number(product.category?.id) === Number(categoryId)) return true;
+    const productCategoryId = getProductCategoryId(product);
+
+    if (productCategoryId && Number(productCategoryId) === Number(category.id)) {
+      return true;
+    }
 
     if (
-      selectedCategory &&
       typeof product.category === "string" &&
       product.category.trim().toLowerCase() ===
-        selectedCategory.name.trim().toLowerCase()
+        category.name?.trim().toLowerCase()
     ) {
       return true;
     }
 
     if (
-      selectedCategory &&
       typeof product.category?.name === "string" &&
       product.category.name.trim().toLowerCase() ===
-        selectedCategory.name.trim().toLowerCase()
+        category.name?.trim().toLowerCase()
     ) {
       return true;
     }
@@ -84,13 +684,57 @@ export default function ProductsPage() {
 
   const selectedCategoryProducts = useMemo(() => {
     if (!categoryId) return products;
-    return products.filter((product) => isSameCategory(product));
-  }, [products, categoryId, selectedCategory]);
 
-  const otherProducts = useMemo(() => {
+    if (!selectedCategory) return [];
+
+    return products.filter((product) =>
+      doesProductBelongToCategory(product, selectedCategory)
+    );
+  }, [products, categoryId, selectedCategory, categories]);
+
+  const otherCategorySections = useMemo(() => {
     if (!categoryId) return [];
-    return products.filter((product) => !isSameCategory(product));
-  }, [products, categoryId, selectedCategory]);
+
+    return categories
+      .filter((category) => Number(category.id) !== Number(categoryId))
+      .map((category) => {
+        const items = products.filter((product) =>
+          doesProductBelongToCategory(product, category)
+        );
+
+        return {
+          category,
+          items,
+        };
+      })
+      .filter((section) => section.items.length > 0);
+  }, [products, categories, categoryId]);
+
+  const otherCategoryProducts = useMemo(() => {
+    return otherCategorySections.flatMap((section) => section.items);
+  }, [otherCategorySections]);
+
+  const getBannerImages = (category) => {
+    if (!category) return [];
+
+    return [
+      ...normalizeImageList(category.bannerImageUrls),
+      ...normalizeImageList(category.bannerImages),
+      ...normalizeImageList(category.banners),
+      ...normalizeImageList(category.bannerImageUrl),
+    ];
+  };
+
+  const getThinBannerImages = (category) => {
+    if (!category) return [];
+
+    return [
+      ...normalizeImageList(category.thinBannerImageUrls),
+      ...normalizeImageList(category.thinBannerImages),
+      ...normalizeImageList(category.thinBanners),
+      ...normalizeImageList(category.thinBannerImageUrl),
+    ];
+  };
 
   const renderGrid = (items) => (
     <div className="grid grid-cols-2 gap-4 sm:grid-cols-2 sm:gap-5 lg:grid-cols-3 xl:grid-cols-4">
@@ -107,56 +751,93 @@ export default function ProductsPage() {
     </div>
   );
 
+  const renderCategoryHeader = (category, count) => {
+    if (!category) return null;
+
+    return (
+      <div className="mb-8 flex items-center gap-4">
+        {category?.imageUrl && (
+          <img
+            src={category.imageUrl}
+            alt={category.name}
+            className="h-16 w-16 rounded-2xl border border-neutral-200 bg-neutral-100 object-cover"
+          />
+        )}
+
+        <div>
+          <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-neutral-500">
+            Trendz AeroX
+          </p>
+
+          <h1 className="mt-2 text-[28px] font-semibold tracking-[-0.03em] text-black sm:text-[34px]">
+            {category.name}
+          </h1>
+
+          <p className="mt-1 text-sm text-neutral-500">
+            {count} products available
+          </p>
+        </div>
+      </div>
+    );
+  };
+
+  const renderCategoryBanner = (category) => {
+    const images = getBannerImages(category);
+
+    if (images.length === 0) return null;
+
+    return (
+      <BannerCarousel
+        images={images}
+        alt={`${category?.name || "Category"} banner`}
+        type="banner"
+      />
+    );
+  };
+
+  const renderThinBanner = (category) => {
+    const images = getThinBannerImages(category);
+
+    if (images.length === 0) return null;
+
+    return (
+      <BannerCarousel
+        images={images}
+        alt={`${category?.name || "Category"} thin banner`}
+        type="thin"
+      />
+    );
+  };
+
+  const hasTopBanner = getBannerImages(selectedCategory).length > 0;
+
   return (
-    <main className="min-h-screen bg-white py-10">
-      {selectedCategory?.thinBannerImageUrl && (
-        <div className="mb-6 w-full overflow-hidden bg-neutral-100">
-          <img
-            src={selectedCategory.thinBannerImageUrl}
-            alt={`${selectedCategory.name} thin banner`}
-            className="h-[90px] w-full object-cover sm:h-[120px]"
-          />
-        </div>
-      )}
+    <main className="min-h-screen bg-white pb-0">
+      {/* Selected category banner carousel */}
+      {renderCategoryBanner(selectedCategory)}
 
-      {selectedCategory?.bannerImageUrl && (
-        <div className="mb-8 w-full overflow-hidden bg-neutral-100 shadow-[0_14px_35px_rgba(0,0,0,0.08)]">
-          <img
-            src={selectedCategory.bannerImageUrl}
-            alt={`${selectedCategory.name} banner`}
-            className="h-[180px] w-full object-cover sm:h-[260px] lg:h-[340px]"
-          />
-        </div>
-      )}
+      {/* Selected category products */}
+      <section
+        className={`mx-auto max-w-[1280px] px-4 sm:px-6 lg:px-8 ${
+          hasTopBanner ? "" : "pt-10"
+        }`}
+      >
+        {selectedCategory ? (
+          renderCategoryHeader(
+            selectedCategory,
+            selectedCategoryProducts.length
+          )
+        ) : (
+          <div className="mb-8">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-neutral-500">
+              Trendz AeroX
+            </p>
 
-      <div className="mx-auto max-w-[1280px] px-4 sm:px-6 lg:px-8">
-        <div className="mb-8 flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
-          <div className="flex items-center gap-4">
-            {selectedCategory?.imageUrl && (
-              <img
-                src={selectedCategory.imageUrl}
-                alt={selectedCategory.name}
-                className="h-16 w-16 rounded-2xl border border-neutral-200 bg-neutral-100 object-cover"
-              />
-            )}
-
-            <div>
-              <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-neutral-500">
-                Trendz AeroX
-              </p>
-
-              <h1 className="mt-2 text-[28px] font-semibold tracking-[-0.03em] text-black sm:text-[34px]">
-                {selectedCategory ? selectedCategory.name : "Products"}
-              </h1>
-
-              {selectedCategory && (
-                <p className="mt-1 text-sm text-neutral-500">
-                  {selectedCategoryProducts.length} products available
-                </p>
-              )}
-            </div>
+            <h1 className="mt-2 text-[28px] font-semibold tracking-[-0.03em] text-black sm:text-[34px]">
+              Products
+            </h1>
           </div>
-        </div>
+        )}
 
         {loading && (
           <p className="text-sm text-neutral-500">Loading products...</p>
@@ -171,9 +852,15 @@ export default function ProductsPage() {
         ) : (
           !loading && renderGrid(selectedCategoryProducts)
         )}
+      </section>
 
-        {!loading && categoryId && otherProducts.length > 0 && (
-          <section className="mt-14">
+      {/* Selected category thin banner carousel */}
+      {renderThinBanner(selectedCategory)}
+
+      {/* Other categories: products only, no category name/header */}
+      {!loading && categoryId && otherCategoryProducts.length > 0 && (
+        <section className="mt-14">
+          <div className="mx-auto max-w-[1280px] px-4 sm:px-6 lg:px-8">
             <div className="mb-6">
               <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-neutral-500">
                 More Collection
@@ -184,10 +871,19 @@ export default function ProductsPage() {
               </h2>
             </div>
 
-            {renderGrid(otherProducts)}
-          </section>
-        )}
-      </div>
+            {renderGrid(otherCategoryProducts)}
+          </div>
+        </section>
+      )}
+
+      {/* End full-width static banner */}
+      <section className="mt-14 w-full overflow-hidden bg-neutral-100">
+        <img
+          src={END_STATIC_BANNER_URL}
+          alt="Trendz AeroX end banner"
+          className="block h-[140px] w-full object-cover sm:h-[190px] lg:h-[260px]"
+        />
+      </section>
     </main>
   );
 }
