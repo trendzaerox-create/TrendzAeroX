@@ -527,8 +527,8 @@ function BannerCarousel({
             alt={`${alt} ${index + 1}`}
             className={`w-full shrink-0 object-cover ${
               isThin
-                ? "h-[90px] sm:h-[120px]"
-                : "h-[180px] sm:h-[260px] lg:h-[340px]"
+  ? "h-[140px] sm:h-[190px] lg:h-[240px]"
+  : "h-[240px] sm:h-[340px] lg:h-[460px]"
             }`}
           />
         ))}
