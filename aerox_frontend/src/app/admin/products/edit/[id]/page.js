@@ -100,6 +100,7 @@
 //   const [price, setPrice] = useState("");
 //   const [mrp, setMrp] = useState("");
 //   const [stock, setStock] = useState("");
+//   const [displayOrder, setDisplayOrder] = useState("");
 //   const [categoryId, setCategoryId] = useState("");
 
 //   const [shortHighlights, setShortHighlights] = useState("");
@@ -158,6 +159,12 @@
 
 //         setStock(
 //           p.stock === null || p.stock === undefined ? "" : String(p.stock)
+//         );
+
+//         setDisplayOrder(
+//           p.displayOrder === null || p.displayOrder === undefined
+//             ? ""
+//             : String(p.displayOrder)
 //         );
 
 //         const resolvedCategoryId =
@@ -364,6 +371,11 @@
 //       return;
 //     }
 
+//     if (displayOrder && Number(displayOrder) < 1) {
+//       alert("Display Order must be 1 or greater");
+//       return;
+//     }
+
 //     if (!categoryId) {
 //       alert("Please select category");
 //       return;
@@ -385,6 +397,7 @@
 //         priceInr: Number(price),
 //         mrpInr: mrp ? Number(mrp) : null,
 //         stock: Number(stock),
+//         displayOrder: displayOrder ? Number(displayOrder) : null,
 //         categoryId: Number(categoryId),
 
 //         images: images.map((item) => getMediaUrl(item)).filter(Boolean),
@@ -919,6 +932,27 @@
 //                 style={inputStyle}
 //               />
 //             </div>
+
+//             <div>
+//               <label style={labelStyle}>Display Order</label>
+//               <input
+//                 type="number"
+//                 min="1"
+//                 value={displayOrder}
+//                 onChange={(e) => setDisplayOrder(e.target.value)}
+//                 placeholder="1"
+//                 style={inputStyle}
+//               />
+//               <p
+//                 style={{
+//                   margin: "6px 0 0",
+//                   fontSize: "12px",
+//                   color: "#6b7280",
+//                 }}
+//               >
+//                 Lower number shows first. Example: 1 = first product.
+//               </p>
+//             </div>
 //           </div>
 
 //           <div>
@@ -948,94 +982,89 @@
 //             />
 //           </div>
 
-
-
 //           {images.length > 0 && (
-//   <div>
-//     <label style={labelStyle}>Current Product Images</label>
+//             <div>
+//               <label style={labelStyle}>Current Product Images</label>
 
-//     <div
-//       style={{
-//         display: "flex",
-//         gap: "12px",
-//         flexWrap: "wrap",
-//         marginTop: "10px",
-//       }}
-//     >
-//       {images.map((item, index) => {
-//         const mediaUrl = resolveUrl(getMediaUrl(item));
-//         const isVideo =
-//           mediaUrl.endsWith(".mp4") ||
-//           mediaUrl.endsWith(".webm") ||
-//           mediaUrl.endsWith(".mov");
-
-//         return (
-//           <div
-//             key={`${mediaUrl}-${index}`}
-//             style={{
-//               position: "relative",
-//               width: "150px",
-//               border: "1px solid #e5e7eb",
-//               borderRadius: "12px",
-//               padding: "8px",
-//               background: "#ffffff",
-//             }}
-//           >
-//             {isVideo ? (
-//               <video
-//                 src={mediaUrl}
-//                 controls
+//               <div
 //                 style={{
-//                   width: "100%",
-//                   height: "120px",
-//                   objectFit: "cover",
-//                   borderRadius: "8px",
-//                   background: "#f3f4f6",
+//                   display: "flex",
+//                   gap: "12px",
+//                   flexWrap: "wrap",
+//                   marginTop: "10px",
 //                 }}
-//               />
-//             ) : (
-//               <img
-//                 src={mediaUrl}
-//                 alt="Product"
-//                 style={{
-//                   width: "100%",
-//                   height: "120px",
-//                   objectFit: "cover",
-//                   borderRadius: "8px",
-//                   background: "#f3f4f6",
-//                 }}
-//               />
-//             )}
+//               >
+//                 {images.map((item, index) => {
+//                   const mediaUrl = resolveUrl(getMediaUrl(item));
+//                   const isVideo =
+//                     mediaUrl.endsWith(".mp4") ||
+//                     mediaUrl.endsWith(".webm") ||
+//                     mediaUrl.endsWith(".mov");
 
-//             <button
-//               type="button"
-//               onClick={() => removeImage(index)}
-//               style={{
-//                 position: "absolute",
-//                 top: "-8px",
-//                 right: "-8px",
-//                 background: "#dc2626",
-//                 color: "#fff",
-//                 border: "none",
-//                 borderRadius: "50%",
-//                 width: "24px",
-//                 height: "24px",
-//                 cursor: "pointer",
-//                 fontSize: "16px",
-//                 fontWeight: "700",
-//               }}
-//             >
-//               ×
-//             </button>
-//           </div>
-//         );
-//       })}
-//     </div>
-//   </div>
-// )}
+//                   return (
+//                     <div
+//                       key={`${mediaUrl}-${index}`}
+//                       style={{
+//                         position: "relative",
+//                         width: "150px",
+//                         border: "1px solid #e5e7eb",
+//                         borderRadius: "12px",
+//                         padding: "8px",
+//                         background: "#ffffff",
+//                       }}
+//                     >
+//                       {isVideo ? (
+//                         <video
+//                           src={mediaUrl}
+//                           controls
+//                           style={{
+//                             width: "100%",
+//                             height: "120px",
+//                             objectFit: "cover",
+//                             borderRadius: "8px",
+//                             background: "#f3f4f6",
+//                           }}
+//                         />
+//                       ) : (
+//                         <img
+//                           src={mediaUrl}
+//                           alt="Product"
+//                           style={{
+//                             width: "100%",
+//                             height: "120px",
+//                             objectFit: "cover",
+//                             borderRadius: "8px",
+//                             background: "#f3f4f6",
+//                           }}
+//                         />
+//                       )}
 
-
-
+//                       <button
+//                         type="button"
+//                         onClick={() => removeImage(index)}
+//                         style={{
+//                           position: "absolute",
+//                           top: "-8px",
+//                           right: "-8px",
+//                           background: "#dc2626",
+//                           color: "#fff",
+//                           border: "none",
+//                           borderRadius: "50%",
+//                           width: "24px",
+//                           height: "24px",
+//                           cursor: "pointer",
+//                           fontSize: "16px",
+//                           fontWeight: "700",
+//                         }}
+//                       >
+//                         ×
+//                       </button>
+//                     </div>
+//                   );
+//                 })}
+//               </div>
+//             </div>
+//           )}
 
 //           <div style={{ display: "flex", gap: "12px", flexWrap: "wrap" }}>
 //             <button
@@ -1078,6 +1107,8 @@
 //     </div>
 //   );
 // }
+
+
 
 
 
@@ -1176,6 +1207,204 @@ function stringifyJson(value) {
   return JSON.stringify(value, null, 2);
 }
 
+function emptyEditorRow() {
+  return { first: "", second: "" };
+}
+
+function getFirstAvailableValue(item, keys) {
+  if (!item || typeof item !== "object") return "";
+
+  for (const key of keys) {
+    const value = item[key];
+
+    if (value !== null && value !== undefined && String(value).trim() !== "") {
+      return String(value);
+    }
+  }
+
+  return "";
+}
+
+function normalizeEditorRows(jsonValue, firstKeys = [], secondKeys = []) {
+  const parsed = safeJsonArray(jsonValue);
+
+  const rows = parsed
+    .map((item) => {
+      if (typeof item === "string") {
+        return {
+          first: item,
+          second: "",
+        };
+      }
+
+      return {
+        first: getFirstAvailableValue(item, firstKeys),
+        second: getFirstAvailableValue(item, secondKeys),
+      };
+    })
+    .filter((row) => row.first.trim() || row.second.trim());
+
+  return rows.length > 0 ? rows : [emptyEditorRow()];
+}
+
+function rowsToJsonArray(rows, firstKey, secondKey) {
+  return rows
+    .map((row) => ({
+      [firstKey]: String(row.first || "").trim(),
+      [secondKey]: String(row.second || "").trim(),
+    }))
+    .filter((item) => item[firstKey] || item[secondKey]);
+}
+
+function rowsToJsonString(rows, firstKey, secondKey) {
+  return stringifyJson(rowsToJsonArray(rows, firstKey, secondKey));
+}
+
+function EditableJsonRows({
+  title,
+  note,
+  rows,
+  onRowsChange,
+  firstLabel,
+  secondLabel,
+  firstPlaceholder,
+  secondPlaceholder,
+  addButtonText,
+  inputStyle,
+  labelStyle,
+}) {
+  const safeRows = rows && rows.length > 0 ? rows : [emptyEditorRow()];
+
+  const updateRow = (index, field, value) => {
+    const nextRows = safeRows.map((row, rowIndex) =>
+      rowIndex === index ? { ...row, [field]: value } : row
+    );
+
+    onRowsChange(nextRows);
+  };
+
+  const addRow = () => {
+    onRowsChange([...safeRows, emptyEditorRow()]);
+  };
+
+  const removeRow = (index) => {
+    const nextRows = safeRows.filter((_, rowIndex) => rowIndex !== index);
+    onRowsChange(nextRows.length > 0 ? nextRows : [emptyEditorRow()]);
+  };
+
+  return (
+    <div>
+      <label style={labelStyle}>{title}</label>
+
+      {note && (
+        <p
+          style={{
+            margin: "-2px 0 12px",
+            fontSize: "12px",
+            lineHeight: 1.5,
+            color: "#6b7280",
+          }}
+        >
+          {note}
+        </p>
+      )}
+
+      <div style={{ display: "grid", gap: "12px" }}>
+        {safeRows.map((row, index) => (
+          <div
+            key={index}
+            style={{
+              display: "grid",
+              gridTemplateColumns: "1fr 1fr auto",
+              gap: "12px",
+              alignItems: "end",
+              border: "1px solid #e5e7eb",
+              borderRadius: "12px",
+              padding: "12px",
+              background: "#ffffff",
+            }}
+          >
+            <div>
+              <label
+                style={{
+                  display: "block",
+                  marginBottom: "6px",
+                  fontSize: "12px",
+                  fontWeight: "700",
+                  color: "#374151",
+                }}
+              >
+                {firstLabel}
+              </label>
+              <input
+                value={row.first}
+                onChange={(e) => updateRow(index, "first", e.target.value)}
+                placeholder={firstPlaceholder}
+                style={inputStyle}
+              />
+            </div>
+
+            <div>
+              <label
+                style={{
+                  display: "block",
+                  marginBottom: "6px",
+                  fontSize: "12px",
+                  fontWeight: "700",
+                  color: "#374151",
+                }}
+              >
+                {secondLabel}
+              </label>
+              <input
+                value={row.second}
+                onChange={(e) => updateRow(index, "second", e.target.value)}
+                placeholder={secondPlaceholder}
+                style={inputStyle}
+              />
+            </div>
+
+            <button
+              type="button"
+              onClick={() => removeRow(index)}
+              style={{
+                padding: "12px 14px",
+                background: "#dc2626",
+                color: "#ffffff",
+                border: "none",
+                borderRadius: "10px",
+                cursor: "pointer",
+                fontWeight: "700",
+                whiteSpace: "nowrap",
+              }}
+            >
+              Remove
+            </button>
+          </div>
+        ))}
+      </div>
+
+      <button
+        type="button"
+        onClick={addRow}
+        style={{
+          marginTop: "12px",
+          padding: "11px 16px",
+          background: "#111827",
+          color: "#ffffff",
+          border: "none",
+          borderRadius: "10px",
+          fontSize: "14px",
+          fontWeight: "700",
+          cursor: "pointer",
+        }}
+      >
+        {addButtonText}
+      </button>
+    </div>
+  );
+}
+
 export default function EditProductPage() {
   const dispatch = useDispatch();
   const router = useRouter();
@@ -1202,14 +1431,17 @@ export default function EditProductPage() {
   const [categoryId, setCategoryId] = useState("");
 
   const [shortHighlights, setShortHighlights] = useState("");
-  const [specificationsJson, setSpecificationsJson] = useState("");
-  const [featureHighlightsJson, setFeatureHighlightsJson] = useState("");
-  const [faqJson, setFaqJson] = useState("");
   const [warrantyInfo, setWarrantyInfo] = useState("");
-  const [boxContentsJson, setBoxContentsJson] = useState("");
   const [compatibility, setCompatibility] = useState("");
   const [demoVideoUrl, setDemoVideoUrl] = useState("");
   const [pdpBannersJson, setPdpBannersJson] = useState("[]");
+
+  const [specificationRows, setSpecificationRows] = useState([
+    emptyEditorRow(),
+  ]);
+  const [featureRows, setFeatureRows] = useState([emptyEditorRow()]);
+  const [faqRows, setFaqRows] = useState([emptyEditorRow()]);
+  const [boxRows, setBoxRows] = useState([emptyEditorRow()]);
 
   const [files, setFiles] = useState([]);
   const [bannerFiles, setBannerFiles] = useState([]);
@@ -1240,6 +1472,11 @@ export default function EditProductPage() {
       .get(`/api/admin/products/${id}`)
       .then((res) => {
         const p = res.data;
+
+        const nextSpecificationsJson = p.specificationsJson || "[]";
+        const nextFeatureHighlightsJson = p.featureHighlightsJson || "[]";
+        const nextFaqJson = p.faqJson || "[]";
+        const nextBoxContentsJson = p.boxContentsJson || "[]";
 
         setProduct(p);
         setTitle(p.title || "");
@@ -1277,14 +1514,42 @@ export default function EditProductPage() {
         );
 
         setShortHighlights(p.shortHighlights || "");
-        setSpecificationsJson(p.specificationsJson || "[]");
-        setFeatureHighlightsJson(p.featureHighlightsJson || "[]");
-        setFaqJson(p.faqJson || "[]");
         setWarrantyInfo(p.warrantyInfo || "");
-        setBoxContentsJson(p.boxContentsJson || "[]");
         setCompatibility(p.compatibility || "");
         setDemoVideoUrl(p.demoVideoUrl || "");
         setPdpBannersJson(p.pdpBannersJson || "[]");
+
+        setSpecificationRows(
+          normalizeEditorRows(
+            nextSpecificationsJson,
+            ["name", "title", "key", "label", "specification"],
+            ["value", "description", "detail", "details"]
+          )
+        );
+
+        setFeatureRows(
+          normalizeEditorRows(
+            nextFeatureHighlightsJson,
+            ["title", "name", "feature", "heading"],
+            ["description", "value", "detail", "details", "text"]
+          )
+        );
+
+        setFaqRows(
+          normalizeEditorRows(
+            nextFaqJson,
+            ["question", "q", "title"],
+            ["answer", "a", "description", "value"]
+          )
+        );
+
+        setBoxRows(
+          normalizeEditorRows(
+            nextBoxContentsJson,
+            ["item", "name", "title", "boxItem", "content"],
+            ["quantity", "detail", "details", "value", "description"]
+          )
+        );
 
         setImages(p.images || []);
         setReviews(p.reviews || []);
@@ -1301,22 +1566,25 @@ export default function EditProductPage() {
     };
   }, [bannerPreviewUrls]);
 
-  const discountPercent = useMemo(() => {
-    const sellingPrice = Number(price);
-    const originalPrice = Number(mrp);
+  const syncSpecificationRows = (nextRows) => {
+    const rows = nextRows.length > 0 ? nextRows : [emptyEditorRow()];
+    setSpecificationRows(rows);
+  };
 
-    if (
-      !Number.isFinite(sellingPrice) ||
-      !Number.isFinite(originalPrice) ||
-      sellingPrice <= 0 ||
-      originalPrice <= 0 ||
-      sellingPrice >= originalPrice
-    ) {
-      return 0;
-    }
+  const syncFeatureRows = (nextRows) => {
+    const rows = nextRows.length > 0 ? nextRows : [emptyEditorRow()];
+    setFeatureRows(rows);
+  };
 
-    return Math.round(((originalPrice - sellingPrice) * 100) / originalPrice);
-  }, [price, mrp]);
+  const syncFaqRows = (nextRows) => {
+    const rows = nextRows.length > 0 ? nextRows : [emptyEditorRow()];
+    setFaqRows(rows);
+  };
+
+  const syncBoxRows = (nextRows) => {
+    const rows = nextRows.length > 0 ? nextRows : [emptyEditorRow()];
+    setBoxRows(rows);
+  };
 
   const handleBannerFileChange = (e) => {
     const selected = Array.from(e.target.files || []);
@@ -1439,6 +1707,23 @@ export default function EditProductPage() {
   const handleUpdate = async () => {
     if (loading) return;
 
+    const cleanSpecificationsJson = rowsToJsonString(
+      specificationRows,
+      "name",
+      "value"
+    );
+    const cleanFeatureHighlightsJson = rowsToJsonString(
+      featureRows,
+      "title",
+      "description"
+    );
+    const cleanFaqJson = rowsToJsonString(faqRows, "question", "answer");
+    const cleanBoxContentsJson = rowsToJsonString(
+      boxRows,
+      "item",
+      "quantity"
+    );
+
     if (!title.trim()) {
       alert("Title is required");
       return;
@@ -1479,11 +1764,14 @@ export default function EditProductPage() {
       return;
     }
 
-    if (!validateJsonArray(specificationsJson, "Specifications JSON")) return;
-    if (!validateJsonArray(featureHighlightsJson, "Feature Highlights JSON"))
+    if (!validateJsonArray(cleanSpecificationsJson, "Specifications JSON"))
       return;
-    if (!validateJsonArray(faqJson, "FAQ JSON")) return;
-    if (!validateJsonArray(boxContentsJson, "Box Contents JSON")) return;
+    if (
+      !validateJsonArray(cleanFeatureHighlightsJson, "Feature Highlights JSON")
+    )
+      return;
+    if (!validateJsonArray(cleanFaqJson, "FAQ JSON")) return;
+    if (!validateJsonArray(cleanBoxContentsJson, "Box Contents JSON")) return;
     if (!validateJsonArray(pdpBannersJson, "PDP Banners JSON")) return;
 
     setLoading(true);
@@ -1501,11 +1789,11 @@ export default function EditProductPage() {
         images: images.map((item) => getMediaUrl(item)).filter(Boolean),
 
         shortHighlights: shortHighlights?.trim() || "",
-        specificationsJson: specificationsJson?.trim() || "[]",
-        featureHighlightsJson: featureHighlightsJson?.trim() || "[]",
-        faqJson: faqJson?.trim() || "[]",
+        specificationsJson: cleanSpecificationsJson,
+        featureHighlightsJson: cleanFeatureHighlightsJson,
+        faqJson: cleanFaqJson,
         warrantyInfo: warrantyInfo?.trim() || "",
-        boxContentsJson: boxContentsJson?.trim() || "[]",
+        boxContentsJson: cleanBoxContentsJson,
         compatibility: compatibility?.trim() || "",
         demoVideoUrl: demoVideoUrl?.trim() || "",
         pdpBannersJson: pdpBannersJson?.trim() || "[]",
@@ -1734,35 +2022,47 @@ export default function EditProductPage() {
               />
             </div>
 
-            <div>
-              <label style={labelStyle}>Specifications JSON</label>
-              <textarea
-                value={specificationsJson}
-                onChange={(e) => setSpecificationsJson(e.target.value)}
-                rows={7}
-                style={jsonTextareaStyle}
-              />
-            </div>
+            <EditableJsonRows
+              title="Specifications"
+              note="Admin fills normal rows. This page automatically saves it as specificationsJson JSON array string."
+              rows={specificationRows}
+              onRowsChange={syncSpecificationRows}
+              firstLabel="Specification Name"
+              secondLabel="Specification Value"
+              firstPlaceholder="Example: Battery Backup"
+              secondPlaceholder="Example: Up to 54 Hours"
+              addButtonText="+ Add Specification"
+              inputStyle={inputStyle}
+              labelStyle={labelStyle}
+            />
 
-            <div>
-              <label style={labelStyle}>Feature Highlights JSON</label>
-              <textarea
-                value={featureHighlightsJson}
-                onChange={(e) => setFeatureHighlightsJson(e.target.value)}
-                rows={7}
-                style={jsonTextareaStyle}
-              />
-            </div>
+            <EditableJsonRows
+              title="Feature Highlights"
+              note="Admin fills normal rows. This page automatically saves it as featureHighlightsJson JSON array string."
+              rows={featureRows}
+              onRowsChange={syncFeatureRows}
+              firstLabel="Feature Title"
+              secondLabel="Feature Description"
+              firstPlaceholder="Example: Deep Bass Sound"
+              secondPlaceholder="Example: Powerful bass with clear vocals"
+              addButtonText="+ Add Feature"
+              inputStyle={inputStyle}
+              labelStyle={labelStyle}
+            />
 
-            <div>
-              <label style={labelStyle}>FAQ JSON</label>
-              <textarea
-                value={faqJson}
-                onChange={(e) => setFaqJson(e.target.value)}
-                rows={7}
-                style={jsonTextareaStyle}
-              />
-            </div>
+            <EditableJsonRows
+              title="FAQs"
+              note="Admin fills normal rows. This page automatically saves it as faqJson JSON array string."
+              rows={faqRows}
+              onRowsChange={syncFaqRows}
+              firstLabel="FAQ Question"
+              secondLabel="FAQ Answer"
+              firstPlaceholder="Example: Is this product wireless?"
+              secondPlaceholder="Example: Yes, it supports wireless use."
+              addButtonText="+ Add FAQ"
+              inputStyle={inputStyle}
+              labelStyle={labelStyle}
+            />
 
             <div>
               <label style={labelStyle}>Warranty Info</label>
@@ -1774,15 +2074,19 @@ export default function EditProductPage() {
               />
             </div>
 
-            <div>
-              <label style={labelStyle}>Box Contents JSON</label>
-              <textarea
-                value={boxContentsJson}
-                onChange={(e) => setBoxContentsJson(e.target.value)}
-                rows={5}
-                style={jsonTextareaStyle}
-              />
-            </div>
+            <EditableJsonRows
+              title="Box Contents"
+              note="Admin fills normal rows. This page automatically saves it as boxContentsJson JSON array string."
+              rows={boxRows}
+              onRowsChange={syncBoxRows}
+              firstLabel="Box Item"
+              secondLabel="Quantity / Detail"
+              firstPlaceholder="Example: Earbuds"
+              secondPlaceholder="Example: 1 Pair"
+              addButtonText="+ Add Box Item"
+              inputStyle={inputStyle}
+              labelStyle={labelStyle}
+            />
 
             <div>
               <label style={labelStyle}>Compatibility</label>
@@ -1981,13 +2285,27 @@ export default function EditProductPage() {
             )}
 
             <div>
-              <label style={labelStyle}>PDP Banners JSON</label>
+              <label style={labelStyle}>PDP Banners JSON Preview</label>
               <textarea
                 value={pdpBannersJson}
-                onChange={(e) => setPdpBannersJson(e.target.value)}
+                readOnly
                 rows={12}
-                style={jsonTextareaStyle}
+                style={{
+                  ...jsonTextareaStyle,
+                  background: "#f3f4f6",
+                  color: "#374151",
+                }}
               />
+              <p
+                style={{
+                  margin: "6px 0 0",
+                  fontSize: "12px",
+                  color: "#6b7280",
+                }}
+              >
+                This is generated automatically from uploaded PDP banners. Admin
+                does not need to type JSON manually.
+              </p>
             </div>
           </div>
 
