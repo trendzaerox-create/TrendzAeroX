@@ -21,7 +21,6 @@
 //     }
 
 //     public List<ProductResponse> getProducts(Long categoryId) {
-
 //         List<Product> products;
 
 //         if (categoryId != null) {
@@ -43,7 +42,6 @@
 //     }
 
 //     private ProductResponse mapToDTO(Product p) {
-
 //         List<String> images = p.getImages()
 //                 .stream()
 //                 .map(i -> i.getImageUrl())
@@ -68,9 +66,18 @@
 //                 p.getMrpInr(),
 //                 p.getDiscountPercent(),
 //                 p.getStock(),
-//                 p.getCategory().getName(),
+//                 p.getCategory() != null ? p.getCategory().getName() : null,
 //                 images,
-//                 reviews
+//                 reviews,
+//                 p.getShortHighlights(),
+//                 p.getSpecificationsJson(),
+//                 p.getFeatureHighlightsJson(),
+//                 p.getFaqJson(),
+//                 p.getWarrantyInfo(),
+//                 p.getBoxContentsJson(),
+//                 p.getCompatibility(),
+//                 p.getDemoVideoUrl(),
+//                 p.getPdpBannersJson()
 //         );
 //     }
 // }
@@ -92,6 +99,7 @@ import com.mydev.ecommerce.product.repository.ProductRepository;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.stereotype.Service;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -114,6 +122,14 @@ public class ProductService {
         }
 
         return products.stream()
+                .sorted(
+                        Comparator
+                                .comparing(
+                                        Product::getDisplayOrder,
+                                        Comparator.nullsLast(Integer::compareTo)
+                                )
+                                .thenComparing(Product::getId)
+                )
                 .map(this::mapToDTO)
                 .toList();
     }
@@ -150,7 +166,11 @@ public class ProductService {
                 p.getMrpInr(),
                 p.getDiscountPercent(),
                 p.getStock(),
+
+                p.getDisplayOrder(),
+                p.getCategory() != null ? p.getCategory().getId() : null,
                 p.getCategory() != null ? p.getCategory().getName() : null,
+
                 images,
                 reviews,
                 p.getShortHighlights(),

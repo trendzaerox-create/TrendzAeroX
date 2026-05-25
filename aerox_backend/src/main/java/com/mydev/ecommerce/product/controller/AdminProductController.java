@@ -54,43 +54,17 @@
 //                 .orElseThrow(() -> new EntityNotFoundException("Product not found"));
 //     }
 
-   
+//     @PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+//     public Map<String, String> uploadImage(@RequestPart("file") MultipartFile file) throws IOException {
 
+//         FileStorageService.UploadResult uploaded = fileStorageService.saveFile(file);
 
-
-
-// //     @PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-// // public Map<String, String> uploadImage(@RequestPart("file") MultipartFile file) throws IOException {
-// //     FileStorageService.UploadResult uploaded = fileStorageService.saveFile(file);
-
-// //     return Map.of(
-// //             "imageUrl", uploaded.imageUrl(),
-// //             "publicId", uploaded.publicId(),
-// //             "resourceType", uploaded.resourceType()
-// //     );
-// // }
-
-
-
-
-// @PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-// public Map<String, String> uploadImage(@RequestPart("file") MultipartFile file) throws IOException {
-
-//     System.out.println("UPLOAD CONTROLLER HIT");
-//     System.out.println("FILE NAME = " + file.getOriginalFilename());
-//     System.out.println("FILE TYPE = " + file.getContentType());
-//     System.out.println("FILE SIZE = " + file.getSize());
-
-//     FileStorageService.UploadResult uploaded = fileStorageService.saveFile(file);
-
-//     return Map.of(
-//             "imageUrl", uploaded.imageUrl(),
-//             "publicId", uploaded.publicId(),
-//             "resourceType", uploaded.resourceType()
-//     );
-// }
-
-
+//         return Map.of(
+//                 "imageUrl", uploaded.imageUrl(),
+//                 "publicId", uploaded.publicId(),
+//                 "resourceType", uploaded.resourceType()
+//         );
+//     }
 
 //     @PostMapping
 //     @Transactional
@@ -110,6 +84,16 @@
 //         p.setCreatedAt(OffsetDateTime.now());
 //         p.setActive(true);
 //         p.setDeleted(false);
+
+//         p.setShortHighlights(req.shortHighlights());
+//         p.setSpecificationsJson(req.specificationsJson());
+//         p.setFeatureHighlightsJson(req.featureHighlightsJson());
+//         p.setFaqJson(req.faqJson());
+//         p.setWarrantyInfo(req.warrantyInfo());
+//         p.setBoxContentsJson(req.boxContentsJson());
+//         p.setCompatibility(req.compatibility());
+//         p.setDemoVideoUrl(req.demoVideoUrl());
+//         p.setPdpBannersJson(req.pdpBannersJson());
 
 //         if (req.images() != null) {
 //             for (String url : req.images()) {
@@ -144,7 +128,19 @@
 //         p.setStock(req.stock());
 //         p.setCategory(cat);
 
-//         Set<String> newImageUrls = req.images() == null ? Set.of() : new LinkedHashSet<>(req.images());
+//         p.setShortHighlights(req.shortHighlights());
+//         p.setSpecificationsJson(req.specificationsJson());
+//         p.setFeatureHighlightsJson(req.featureHighlightsJson());
+//         p.setFaqJson(req.faqJson());
+//         p.setWarrantyInfo(req.warrantyInfo());
+//         p.setBoxContentsJson(req.boxContentsJson());
+//         p.setCompatibility(req.compatibility());
+//         p.setDemoVideoUrl(req.demoVideoUrl());
+//         p.setPdpBannersJson(req.pdpBannersJson());
+
+//         Set<String> newImageUrls = req.images() == null
+//                 ? Set.of()
+//                 : new LinkedHashSet<>(req.images());
 
 //         for (ProductImage oldImage : p.getImages()) {
 //             if (!newImageUrls.contains(oldImage.getImageUrl())) {
@@ -246,7 +242,6 @@
 //         }
 
 //         String path = imageUrl.substring(uploadIndex + "/upload/".length());
-
 //         path = path.replaceFirst("^v\\d+/", "");
 
 //         int lastDot = path.lastIndexOf('.');
@@ -257,6 +252,19 @@
 //         return path;
 //     }
 // }
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -341,6 +349,15 @@ public class AdminProductController {
         p.setPriceInr(req.priceInr());
         p.setMrpInr(req.mrpInr());
         p.setStock(req.stock());
+
+        // If frontend sends displayOrder, use it.
+        // If not, place new product at the end.
+        p.setDisplayOrder(
+                req.displayOrder() == null
+                        ? getNextDisplayOrder()
+                        : req.displayOrder()
+        );
+
         p.setCategory(cat);
         p.setCreatedAt(OffsetDateTime.now());
         p.setActive(true);
@@ -387,6 +404,13 @@ public class AdminProductController {
         p.setPriceInr(req.priceInr());
         p.setMrpInr(req.mrpInr());
         p.setStock(req.stock());
+
+        // If frontend sends displayOrder, update it.
+        // If not, keep existing order unchanged.
+        if (req.displayOrder() != null) {
+            p.setDisplayOrder(req.displayOrder());
+        }
+
         p.setCategory(cat);
 
         p.setShortHighlights(req.shortHighlights());
@@ -490,6 +514,11 @@ public class AdminProductController {
         if (req.mrpInr() != null && req.mrpInr() < req.priceInr()) {
             throw new RuntimeException("MRP must be greater than or equal to selling price");
         }
+    }
+
+    private Integer getNextDisplayOrder() {
+        Integer maxDisplayOrder = productRepo.findMaxDisplayOrder();
+        return maxDisplayOrder == null ? 1 : maxDisplayOrder + 1;
     }
 
     private String extractPublicId(String imageUrl) {

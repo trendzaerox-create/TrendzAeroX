@@ -1,3 +1,4 @@
+
 // "use client";
 
 // import { useEffect, useMemo, useState } from "react";
@@ -5,6 +6,9 @@
 
 // import ProductCard from "@/components/ProductCard";
 // import api from "@/lib/apiClient";
+
+// const END_STATIC_BANNER_URL =
+//   "https://t4.ftcdn.net/jpg/01/99/07/97/360_F_199079722_wxjZlTjvzMx9KF2kXReaKtePZwJXjfRW.jpg";
 
 // function normalizeImageList(value) {
 //   if (!value) return [];
@@ -69,8 +73,8 @@
 //             alt={`${alt} ${index + 1}`}
 //             className={`w-full shrink-0 object-cover ${
 //               isThin
-//                 ? "h-[90px] sm:h-[120px]"
-//                 : "h-[180px] sm:h-[260px] lg:h-[340px]"
+//   ? "h-[140px] sm:h-[190px] lg:h-[240px]"
+//   : "h-[240px] sm:h-[340px] lg:h-[460px]"
 //             }`}
 //           />
 //         ))}
@@ -252,6 +256,10 @@
 //       .filter((section) => section.items.length > 0);
 //   }, [products, categories, categoryId]);
 
+//   const otherCategoryProducts = useMemo(() => {
+//     return otherCategorySections.flatMap((section) => section.items);
+//   }, [otherCategorySections]);
+
 //   const getBannerImages = (category) => {
 //     if (!category) return [];
 
@@ -350,7 +358,7 @@
 //   const hasTopBanner = getBannerImages(selectedCategory).length > 0;
 
 //   return (
-//     <main className="min-h-screen bg-white pb-10">
+//     <main className="min-h-screen bg-white pb-0">
 //       {/* Selected category banner carousel */}
 //       {renderCategoryBanner(selectedCategory)}
 
@@ -395,8 +403,8 @@
 //       {/* Selected category thin banner carousel */}
 //       {renderThinBanner(selectedCategory)}
 
-//       {/* Other categories: banner carousel -> products -> thin banner carousel */}
-//       {!loading && categoryId && otherCategorySections.length > 0 && (
+//       {/* Other categories: products only, no category name/header */}
+//       {!loading && categoryId && otherCategoryProducts.length > 0 && (
 //         <section className="mt-14">
 //           <div className="mx-auto max-w-[1280px] px-4 sm:px-6 lg:px-8">
 //             <div className="mb-6">
@@ -408,38 +416,23 @@
 //                 Other Products You May Like
 //               </h2>
 //             </div>
+
+//             {renderGrid(otherCategoryProducts)}
 //           </div>
-
-//           {otherCategorySections.map(({ category, items }) => (
-//             <div key={category.id || category.name} className="mt-10">
-//               {/* Other category banner carousel */}
-//               {renderCategoryBanner(category)}
-
-//               {/* Other category products */}
-//               <div className="mx-auto max-w-[1280px] px-4 sm:px-6 lg:px-8">
-//                 {renderCategoryHeader(category, items.length)}
-
-//                 {renderGrid(items)}
-//               </div>
-
-//               {/* Other category thin banner carousel */}
-//               {renderThinBanner(category)}
-//             </div>
-//           ))}
 //         </section>
 //       )}
+
+//       {/* End full-width static banner */}
+//       <section className="mt-14 w-full overflow-hidden bg-neutral-100">
+//         <img
+//           src={END_STATIC_BANNER_URL}
+//           alt="Trendz AeroX end banner"
+//           className="block h-[140px] w-full object-cover sm:h-[190px] lg:h-[260px]"
+//         />
+//       </section>
 //     </main>
 //   );
 // }
-
-
-
-
-
-
-
-
-
 
 
 
@@ -479,6 +472,33 @@ function normalizeImageList(value) {
   }
 
   return [];
+}
+
+// ✅ FIX: supports both displayOrder and display_order
+function getDisplayOrder(product) {
+  const value = product?.displayOrder ?? product?.display_order;
+
+  if (value === null || value === undefined || value === "") {
+    return 999999;
+  }
+
+  const numberValue = Number(value);
+
+  return Number.isFinite(numberValue) ? numberValue : 999999;
+}
+
+// ✅ FIX: products arranged by display_order / displayOrder
+function sortProductsByDisplayOrder(items = []) {
+  return [...items].sort((a, b) => {
+    const orderA = getDisplayOrder(a);
+    const orderB = getDisplayOrder(b);
+
+    if (orderA !== orderB) {
+      return orderA - orderB;
+    }
+
+    return Number(a.id || 0) - Number(b.id || 0);
+  });
 }
 
 function BannerCarousel({
@@ -527,8 +547,8 @@ function BannerCarousel({
             alt={`${alt} ${index + 1}`}
             className={`w-full shrink-0 object-cover ${
               isThin
-  ? "h-[140px] sm:h-[190px] lg:h-[240px]"
-  : "h-[240px] sm:h-[340px] lg:h-[460px]"
+                ? "h-[140px] sm:h-[190px] lg:h-[240px]"
+                : "h-[240px] sm:h-[340px] lg:h-[460px]"
             }`}
           />
         ))}
@@ -579,7 +599,13 @@ export default function ProductsPage() {
           api.get("/api/categories"),
         ]);
 
-        setProducts(Array.isArray(productsRes.data) ? productsRes.data : []);
+        const productData = Array.isArray(productsRes.data)
+          ? productsRes.data
+          : [];
+
+        // ✅ FIX: store products in correct display order
+        setProducts(sortProductsByDisplayOrder(productData));
+
         setCategories(
           Array.isArray(categoriesRes.data) ? categoriesRes.data : []
         );
@@ -605,6 +631,7 @@ export default function ProductsPage() {
 
   const getProductCategoryId = (product) => {
     if (product.categoryId) return Number(product.categoryId);
+    if (product.category_id) return Number(product.category_id);
     if (product.category?.id) return Number(product.category.id);
     return null;
   };
@@ -683,13 +710,17 @@ export default function ProductsPage() {
   };
 
   const selectedCategoryProducts = useMemo(() => {
-    if (!categoryId) return products;
+    if (!categoryId) {
+      return sortProductsByDisplayOrder(products);
+    }
 
     if (!selectedCategory) return [];
 
-    return products.filter((product) =>
+    const filteredProducts = products.filter((product) =>
       doesProductBelongToCategory(product, selectedCategory)
     );
+
+    return sortProductsByDisplayOrder(filteredProducts);
   }, [products, categoryId, selectedCategory, categories]);
 
   const otherCategorySections = useMemo(() => {
@@ -704,14 +735,16 @@ export default function ProductsPage() {
 
         return {
           category,
-          items,
+          items: sortProductsByDisplayOrder(items),
         };
       })
       .filter((section) => section.items.length > 0);
   }, [products, categories, categoryId]);
 
   const otherCategoryProducts = useMemo(() => {
-    return otherCategorySections.flatMap((section) => section.items);
+    return sortProductsByDisplayOrder(
+      otherCategorySections.flatMap((section) => section.items)
+    );
   }, [otherCategorySections]);
 
   const getBannerImages = (category) => {
@@ -719,9 +752,12 @@ export default function ProductsPage() {
 
     return [
       ...normalizeImageList(category.bannerImageUrls),
+      ...normalizeImageList(category.banner_image_urls),
       ...normalizeImageList(category.bannerImages),
+      ...normalizeImageList(category.banner_images),
       ...normalizeImageList(category.banners),
       ...normalizeImageList(category.bannerImageUrl),
+      ...normalizeImageList(category.banner_image_url),
     ];
   };
 
@@ -730,9 +766,13 @@ export default function ProductsPage() {
 
     return [
       ...normalizeImageList(category.thinBannerImageUrls),
+      ...normalizeImageList(category.thin_banner_image_urls),
       ...normalizeImageList(category.thinBannerImages),
+      ...normalizeImageList(category.thin_banner_images),
       ...normalizeImageList(category.thinBanners),
+      ...normalizeImageList(category.thin_banners),
       ...normalizeImageList(category.thinBannerImageUrl),
+      ...normalizeImageList(category.thin_banner_image_url),
     ];
   };
 
@@ -743,6 +783,10 @@ export default function ProductsPage() {
           <ProductCard
             product={{
               ...product,
+
+              // ✅ FIX: ProductCard can now safely receive displayOrder
+              displayOrder: product.displayOrder ?? product.display_order,
+
               displayCategoryName: getCategoryName(product),
             }}
           />
