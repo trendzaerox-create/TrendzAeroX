@@ -49,22 +49,6 @@ function getMediaType(url) {
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 function safeJsonParse(value, fallback = []) {
   if (!value) return fallback;
   if (Array.isArray(value)) return value;
@@ -112,6 +96,66 @@ function splitHighlights(value) {
     .map((item) => item.trim())
     .filter(Boolean);
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+function getDisplayValue(item) {
+  if (!item) return "";
+
+  if (typeof item === "string") {
+    return item.trim();
+  }
+
+  if (typeof item !== "object") {
+    return String(item).trim();
+  }
+
+  const name =
+    item.name ||
+    item.item ||
+    item.label ||
+    item.title ||
+    item.value ||
+    "";
+
+  const detail =
+    item.quantity ||
+    item.qty ||
+    item.count ||
+    item.detail ||
+    item.description ||
+    "";
+
+  if (name && detail) return `${name} - ${detail}`.trim();
+  return String(name || detail).trim();
+}
+
+
+
+
+
+
+
+
+
+
 
 const MIN_ZOOM = 1;
 const MAX_ZOOM = 3.4;
@@ -690,11 +734,72 @@ export default function ProductPage() {
     product.featureHighlights || product.featureHighlightsJson,
     [],
   );
-  const faqs = safeJsonParse(product.faq || product.faqJson, []);
+
+
+
+  const rawFaqs = safeJsonParse(
+  product.faqs || product.faqsJson || product.faqs_json || product.faqJson,
+  [],
+);
+
+const faqs = Array.isArray(rawFaqs)
+  ? rawFaqs
+      .map((item) => {
+        if (!item) return null;
+
+        if (typeof item === "string") {
+          const text = item.trim();
+          return text ? { question: text, answer: "" } : null;
+        }
+
+        if (typeof item !== "object") return null;
+
+        const question =
+          item.question || item.title || item.label || item.q || "";
+
+        const answer =
+          item.answer || item.description || item.value || item.a || "";
+
+        if (!question && !answer) return null;
+
+        return {
+          question,
+          answer,
+        };
+      })
+      .filter(Boolean)
+  : [];
+
+
+
+  
   const boxContents = safeJsonParse(
-    product.boxContents || product.boxContentsJson,
-    [],
-  );
+  product.boxContents || product.boxContentsJson,
+  [],
+);
+
+const visibleBoxContents = Array.isArray(boxContents)
+  ? boxContents.map(getDisplayValue).filter(Boolean)
+  : [];
+
+const compatibilityRaw =
+  product.compatibility || product.compatibilityJson || "";
+
+const compatibilityParsed = safeJsonParse(compatibilityRaw, null);
+
+const compatibilityIsList =
+  Array.isArray(compatibilityParsed) || String(compatibilityRaw).includes("|");
+
+const compatibilityItems = Array.isArray(compatibilityParsed)
+  ? compatibilityParsed.map(getDisplayValue).filter(Boolean)
+  : compatibilityParsed && typeof compatibilityParsed === "object"
+    ? [getDisplayValue(compatibilityParsed)].filter(Boolean)
+    : String(compatibilityRaw)
+        .split("|")
+        .map((item) => item.trim())
+        .filter(Boolean);
+
+const hasCompatibility = compatibilityItems.length > 0;
 
   const pdpBanners = safeJsonParse(
     product.pdpBanners || product.pdpBannersJson || product.pdp_banners_json,
@@ -921,21 +1026,7 @@ export default function ProductPage() {
                 </span>
               </div>
 
-              <div className="description-box">
-                <p className="description-text">{product.description}</p>
-              </div>
-
-              {shortHighlights.length > 0 && (
-                <div className="quick-highlights">
-                  {shortHighlights.map((item, index) => (
-                    <span key={`${item}-${index}`} className="quick-pill">
-                      {item}
-                    </span>
-                  ))}
-                </div>
-              )}
-
-              <div className="action-buttons">
+               <div className="action-buttons">
                 <button
                   onClick={handleAddToCart}
                   disabled={product.stock <= 0}
@@ -971,6 +1062,23 @@ export default function ProductPage() {
                   {isWishlisted ? "♥ Added to Wishlist" : "♡ Add to Wishlist"}
                 </button>
               </div>
+
+
+              <div className="description-box">
+                <p className="description-text">{product.description}</p>
+              </div>
+
+              {shortHighlights.length > 0 && (
+                <div className="quick-highlights">
+                  {shortHighlights.map((item, index) => (
+                    <span key={`${item}-${index}`} className="quick-pill">
+                      {item}
+                    </span>
+                  ))}
+                </div>
+              )}
+
+             
 
               <div className="trust-grid">
                 <div className="trust-box">
@@ -1031,40 +1139,52 @@ export default function ProductPage() {
               </div>
             )}
 
-            {(product.warrantyInfo ||
-              product.compatibility ||
-              boxContents.length > 0) && (
-              <div className="details-card">
-                <h2 className="details-title">Warranty & Box Contents</h2>
+{(product.warrantyInfo || hasCompatibility || visibleBoxContents.length > 0) && (
+  <div className="details-card">
+    <h2 className="details-title">
+      {product.warrantyInfo || visibleBoxContents.length > 0
+        ? "Warranty & Box Contents"
+        : "Compatibility"}
+    </h2>
 
-                {product.warrantyInfo && (
-                  <div className="info-line">
-                    <span>Warranty</span>
-                    <p>{product.warrantyInfo}</p>
-                  </div>
-                )}
+    {product.warrantyInfo && (
+      <div className="info-line">
+        <span>Warranty</span>
+        <p>{product.warrantyInfo}</p>
+      </div>
+    )}
 
-                {product.compatibility && (
-                  <div className="info-line">
-                    <span>Compatibility</span>
-                    <p>{product.compatibility}</p>
-                  </div>
-                )}
+    {hasCompatibility && (
+      <div className="info-line compatibility-line">
+        <span>Compatibility</span>
 
-                {boxContents.length > 0 && (
-                  <div className="box-list">
-                    {boxContents.map((item, index) => (
-                      <div key={index} className="box-item">
-                        ✓{" "}
-                        {typeof item === "string"
-                          ? item
-                          : item?.value || item?.name}
-                      </div>
-                    ))}
-                  </div>
-                )}
+        {compatibilityIsList ? (
+          <div className="compatibility-list">
+            {compatibilityItems.map((item, index) => (
+              <div key={`${item}-${index}`} className="compatibility-item">
+                <span className="box-check">✓</span>
+                <span className="box-text">{item}</span>
               </div>
-            )}
+            ))}
+          </div>
+        ) : (
+          <p>{compatibilityItems[0]}</p>
+        )}
+      </div>
+    )}
+
+    {visibleBoxContents.length > 0 && (
+      <div className="box-list">
+        {visibleBoxContents.map((item, index) => (
+          <div key={`${item}-${index}`} className="box-item">
+            <span className="box-check">✓</span>
+            <span className="box-text">{item}</span>
+          </div>
+        ))}
+      </div>
+    )}
+  </div>
+)}
 
             {product.demoVideoUrl && (
   <div className="details-card">
@@ -1094,20 +1214,21 @@ export default function ProductPage() {
 )}
 
             {faqs.length > 0 && (
-              <div className="details-card full-details-card">
-                <h2 className="details-title">Frequently Asked Questions</h2>
-                <div className="faq-list">
-                  {faqs.map((item, index) => (
-                    <details key={index} className="faq-item">
-                      <summary>
-                        {item.question || `Question ${index + 1}`}
-                      </summary>
-                      <p>{item.answer || ""}</p>
-                    </details>
-                  ))}
-                </div>
-              </div>
-            )}
+  <div className="details-card faq-details-card">
+    <h2 className="details-title">Frequently Asked Questions</h2>
+
+    <div className="faq-list">
+      {faqs.map((item, index) => (
+        <details key={index} className="faq-item">
+          <summary>
+            {item.question || `Question ${index + 1}`}
+          </summary>
+          <p>{item.answer || ""}</p>
+        </details>
+      ))}
+    </div>
+  </div>
+)}
           </div>
 
           <div className="reviews-card">
@@ -1192,6 +1313,7 @@ export default function ProductPage() {
     grid-template-columns: minmax(0, 1.18fr) minmax(360px, 430px);
     gap: 30px;
     align-items: start;
+    position: relative;
   }
 
   .product-gallery-card,
@@ -1212,6 +1334,9 @@ export default function ProductPage() {
     padding: 26px;
     min-width: 0;
     overflow: visible;
+    position: sticky;
+    top: 20px;
+    align-self: start;
     background:
       linear-gradient(
         180deg,
@@ -1499,12 +1624,34 @@ export default function ProductPage() {
     padding: 34px;
     position: sticky;
     top: 20px;
+    align-self: start;
+    max-height: calc(100vh - 40px);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scrollbar-gutter: stable;
     background:
       linear-gradient(
         180deg,
         rgba(255, 255, 255, 0.98) 0%,
         rgba(248, 250, 252, 0.95) 100%
       );
+  }
+
+  .product-info-card::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  .product-info-card::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .product-info-card::-webkit-scrollbar-thumb {
+    background: rgba(148, 163, 184, 0.55);
+    border-radius: 999px;
+  }
+
+  .product-info-card::-webkit-scrollbar-thumb:hover {
+    background: rgba(100, 116, 139, 0.75);
   }
 
   .top-label {
@@ -1623,39 +1770,6 @@ export default function ProductPage() {
     box-shadow: 0 10px 22px rgba(153, 27, 27, 0.16);
   }
 
-  .description-box {
-    border-top: 1px solid rgba(226, 232, 240, 0.9);
-    border-bottom: 1px solid rgba(226, 232, 240, 0.9);
-    padding: 20px 0;
-    margin-bottom: 20px;
-  }
-
-  .description-text {
-    margin: 0;
-    color: #475569;
-    font-size: 15px;
-    line-height: 1.9;
-    font-weight: 500;
-  }
-
-  .quick-highlights {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
-    margin-bottom: 24px;
-  }
-
-  .quick-pill {
-    background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
-    border: 1px solid rgba(226, 232, 240, 0.9);
-    color: #0f172a;
-    padding: 9px 13px;
-    border-radius: 999px;
-    font-size: 12px;
-    font-weight: 800;
-    letter-spacing: 0.02em;
-  }
-
   .action-buttons {
     display: grid;
     gap: 14px;
@@ -1709,6 +1823,39 @@ export default function ProductPage() {
     background: #0f172a;
     color: #fff;
     transform: translateY(-2px);
+  }
+
+  .description-box {
+    border-top: 1px solid rgba(226, 232, 240, 0.9);
+    border-bottom: 1px solid rgba(226, 232, 240, 0.9);
+    padding: 20px 0;
+    margin-bottom: 20px;
+  }
+
+  .description-text {
+    margin: 0;
+    color: #475569;
+    font-size: 15px;
+    line-height: 1.9;
+    font-weight: 500;
+  }
+
+  .quick-highlights {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 24px;
+  }
+
+  .quick-pill {
+    background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+    border: 1px solid rgba(226, 232, 240, 0.9);
+    color: #0f172a;
+    padding: 9px 13px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: 0.02em;
   }
 
   .trust-grid {
@@ -1828,7 +1975,11 @@ export default function ProductPage() {
     margin-bottom: 18px;
   }
 
-  .info-line span {
+  .info-line:last-child {
+    margin-bottom: 0;
+  }
+
+  .info-line > span {
     display: block;
     color: #0f172a;
     font-weight: 800;
@@ -1839,14 +1990,28 @@ export default function ProductPage() {
     margin: 0;
     color: #64748b;
     line-height: 1.8;
+    font-size: 15px;
+    word-break: break-word;
   }
 
+  .compatibility-line {
+    padding-bottom: 2px;
+  }
+
+  .compatibility-list,
   .box-list {
     display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 10px;
+    margin-top: 12px;
   }
 
+  .compatibility-item,
   .box-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    min-height: 46px;
     background:
       linear-gradient(
         180deg,
@@ -1859,21 +2024,37 @@ export default function ProductPage() {
     color: #334155;
     font-size: 14px;
     font-weight: 700;
+    line-height: 1.5;
   }
 
-.demo-video {
-  width: 100%;
-  height: 420px;
-  border-radius: 20px;
-  background: #000;
-  border: none;
-}
+  .box-check {
+    width: 22px;
+    height: 22px;
+    min-width: 22px;
+    border-radius: 999px;
+    background: #f1f5f9;
+    color: #0f172a;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    font-weight: 900;
+    margin-top: 1px;
+  }
 
-@media (max-width: 767px) {
+  .box-text {
+    min-width: 0;
+    flex: 1;
+    word-break: break-word;
+  }
+
   .demo-video {
-    height: 260px;
+    width: 100%;
+    height: 420px;
+    border-radius: 20px;
+    background: #000;
+    border: none;
   }
-}
 
   .faq-list {
     display: grid;
@@ -2011,44 +2192,308 @@ export default function ProductPage() {
     font-weight: 800;
   }
 
-.pdp-banners-section {
-  width: 100vw;
-  margin-left: calc(50% - 50vw);
-  margin-top: 44px;
-  display: grid;
-  gap: 0;
-}
+  .review-text {
+    margin: 0;
+    color: #475569;
+    line-height: 1.8;
+    font-size: 15px;
+  }
 
-.pdp-banner-card {
-  position: relative;
-  width: 100%;
-  min-height: 460px;
-  border-radius: 0;
-  overflow: hidden;
-  background: #ffffff;
-}
+  .pdp-banners-section {
+    width: 100vw;
+    margin-left: calc(50% - 50vw);
+    margin-top: 44px;
+    display: grid;
+    gap: 0;
+  }
 
-.pdp-banner-image {
-  width: 100%;
-  height: 100%;
-  min-height: 460px;
-  object-fit: cover;
-  display: block;
-}
+  .pdp-banner-card {
+    position: relative;
+    width: 100%;
+    min-height: 460px;
+    border-radius: 0;
+    overflow: hidden;
+    background: #ffffff;
+  }
 
-  
-
-  
-
-
-
-
-
- 
+  .pdp-banner-image {
+    width: 100%;
+    height: 100%;
+    min-height: 460px;
+    object-fit: cover;
+    display: block;
+  }
 
   .pdp-banner-button:hover {
     transform: translateY(-2px);
     background: #f8fafc;
+  }
+
+  /* =========================
+     DESKTOP / LAPTOP COMPACT PDP FIX
+     ========================= */
+
+  @media (min-width: 1200px) {
+    .product-main-layout {
+      grid-template-columns: minmax(0, 1.08fr) minmax(360px, 410px);
+      gap: 24px;
+      align-items: start;
+    }
+
+    .product-gallery-card {
+      padding: 20px;
+      top: 14px;
+    }
+
+    .product-gallery-grid.has-thumbs {
+      grid-template-columns: 82px minmax(0, 1fr);
+      gap: 16px;
+    }
+
+    .thumbnail-list {
+      gap: 10px;
+      max-height: calc(100vh - 92px);
+    }
+
+    .thumbnail-btn {
+      border-radius: 15px;
+      padding: 5px;
+    }
+
+    .thumbnail-img,
+    .thumbnail-video-wrap {
+      height: 74px;
+      border-radius: 10px;
+    }
+
+    .main-image-wrapper {
+      padding: 12px;
+      border-radius: 22px;
+    }
+
+    .main-zoom-stage {
+      aspect-ratio: 1 / 0.78;
+      max-height: calc(100vh - 92px);
+      min-height: 410px;
+      border-radius: 16px;
+    }
+
+    .main-product-image {
+      padding: 22px;
+    }
+
+    .main-image-badges {
+      top: 18px;
+      left: 18px;
+    }
+
+    .badge-dark,
+    .badge-light {
+      padding: 7px 12px;
+      font-size: 10px;
+    }
+
+    .main-arrow-btn {
+      width: 46px;
+      height: 46px;
+      font-size: 30px;
+    }
+
+    .main-arrow-left {
+      left: 14px;
+    }
+
+    .main-arrow-right {
+      right: 14px;
+    }
+
+    .main-zoom-hint {
+      right: 14px;
+      bottom: 14px;
+      font-size: 11px;
+      padding: 6px 10px;
+    }
+
+    .full-view-trigger {
+      margin-top: 10px;
+      font-size: 13px;
+    }
+
+    .product-info-card {
+      padding: 26px;
+      top: 14px;
+      max-height: calc(100vh - 28px);
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
+    }
+
+    .top-label {
+      padding: 6px 13px;
+      font-size: 10px;
+      margin-bottom: 14px;
+    }
+
+    .product-title {
+      font-size: clamp(26px, 2.2vw, 34px);
+      line-height: 1.18;
+      margin-bottom: 12px;
+      letter-spacing: -0.025em;
+    }
+
+    .rating-row {
+      margin-bottom: 16px;
+      gap: 10px;
+    }
+
+    .rating-text {
+      font-size: 13px;
+    }
+
+    .price-stock-row {
+      margin-bottom: 16px;
+      gap: 10px;
+    }
+
+    .price-display-row {
+      gap: 10px;
+    }
+
+    .discount-badge {
+      font-size: 24px;
+      line-height: 1;
+    }
+
+    .price-text {
+      font-size: clamp(38px, 3.2vw, 46px);
+      line-height: 1;
+    }
+
+    .mrp-line {
+      font-size: 13px;
+      margin-top: 3px;
+    }
+
+    .stock-pill {
+      padding: 8px 13px;
+      font-size: 10px;
+    }
+
+    .action-buttons {
+      gap: 10px;
+      margin-bottom: 14px;
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      background:
+        linear-gradient(
+          180deg,
+          rgba(255, 255, 255, 0.98) 0%,
+          rgba(248, 250, 252, 0.96) 100%
+        );
+      padding: 0 0 14px;
+      border-bottom: 1px solid rgba(226, 232, 240, 0.75);
+    }
+
+    .add-to-cart-btn,
+    .buy-now-btn,
+    .wishlist-pdp-btn {
+      padding: 13px 20px;
+      border-radius: 15px;
+      font-size: 14px;
+    }
+
+    .description-box {
+      padding: 14px 0;
+      margin-bottom: 14px;
+    }
+
+    .description-text {
+      font-size: 14px;
+      line-height: 1.65;
+    }
+
+    .quick-highlights {
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+
+    .quick-pill {
+      padding: 7px 11px;
+      font-size: 11px;
+    }
+
+    .trust-grid {
+      margin-top: 14px;
+      gap: 10px;
+    }
+
+    .trust-box {
+      padding: 12px 14px;
+      font-size: 13px;
+      border-radius: 14px;
+    }
+  }
+
+  @media (min-width: 1200px) and (max-height: 720px) {
+    .product-gallery-card {
+      padding: 18px;
+    }
+
+    .main-zoom-stage {
+      aspect-ratio: 1 / 0.72;
+      min-height: 360px;
+      max-height: calc(100vh - 86px);
+    }
+
+    .main-product-image {
+      padding: 18px;
+    }
+
+    .product-info-card {
+      padding: 22px;
+    }
+
+    .product-title {
+      font-size: clamp(24px, 2vw, 31px);
+      line-height: 1.15;
+      margin-bottom: 10px;
+    }
+
+    .top-label {
+      margin-bottom: 12px;
+    }
+
+    .rating-row {
+      margin-bottom: 13px;
+    }
+
+    .price-stock-row {
+      margin-bottom: 13px;
+    }
+
+    .discount-badge {
+      font-size: 22px;
+    }
+
+    .price-text {
+      font-size: clamp(34px, 3vw, 42px);
+    }
+
+    .add-to-cart-btn,
+    .buy-now-btn,
+    .wishlist-pdp-btn {
+      padding: 12px 18px;
+      border-radius: 14px;
+    }
+
+    .description-box {
+      padding: 12px 0;
+    }
+
+    .description-text {
+      line-height: 1.55;
+    }
   }
 
   @media (max-width: 1199px) {
@@ -2056,8 +2501,11 @@ export default function ProductPage() {
       grid-template-columns: 1fr;
     }
 
+    .product-gallery-card,
     .product-info-card {
       position: static;
+      max-height: none;
+      overflow: visible;
     }
   }
 
@@ -2139,6 +2587,21 @@ export default function ProductPage() {
     .spec-row {
       grid-template-columns: 1fr;
       gap: 6px;
+    }
+
+    .compatibility-list,
+    .box-list {
+      grid-template-columns: 1fr;
+    }
+
+    .compatibility-item,
+    .box-item {
+      min-height: 44px;
+      padding: 12px 14px;
+    }
+
+    .demo-video {
+      height: 260px;
     }
 
     .reviews-title,
