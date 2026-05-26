@@ -73,7 +73,7 @@ export default function ProductCard({ product }) {
             </button>
 
             {firstImage ? (
-              <div className="relative h-full w-full overflow-hidden rounded-[10px] bg-[#fafafa] sm:rounded-[12px]">
+              <div className="relative h-full w-full overflow-hidden rounded-[10px] bg-white sm:rounded-[12px]">
                 <img
                   src={getImageUrl(firstImage)}
                   alt={product.title}
@@ -95,7 +95,7 @@ export default function ProductCard({ product }) {
                 )}
               </div>
             ) : (
-              <div className="flex h-full w-full items-center justify-center rounded-[10px] bg-[#fafafa] text-xs font-medium text-neutral-500 sm:rounded-[12px] sm:text-sm">
+              <div className="flex h-full w-full items-center justify-center rounded-[10px] bg-white text-xs font-medium text-neutral-500 sm:rounded-[12px] sm:text-sm">
                 No Image
               </div>
             )}
