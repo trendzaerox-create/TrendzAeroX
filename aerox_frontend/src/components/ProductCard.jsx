@@ -14,12 +14,6 @@ export default function ProductCard({ product }) {
       ? Math.round(((mrp - sellingPrice) / mrp) * 100)
       : 0;
 
-  const productInfo =
-    product.shortDescription ||
-    product.description ||
-    product.category?.name ||
-    "Premium product by Trendz AeroX";
-
   return (
     <Link href={`/product/${product.id}`} className="block h-full">
       <article className="group flex h-full flex-col overflow-hidden rounded-[12px] border border-neutral-200 bg-white shadow-[0_2px_10px_rgba(0,0,0,0.12)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_10px_28px_rgba(0,0,0,0.18)] sm:min-h-[400px] sm:rounded-[14px] sm:shadow-[0_2px_10px_rgba(0,0,0,0.14)]">
@@ -64,11 +58,6 @@ export default function ProductCard({ product }) {
               </span>
             )}
           </div>
-
-          {/* Product Info - hidden on mobile */}
-          <p className="mt-2 hidden line-clamp-1 text-[11px] font-medium text-neutral-700 sm:block">
-            {productInfo}
-          </p>
 
           {/* Offer Row - hidden on mobile */}
           {discountPercent > 0 && (
