@@ -5,6 +5,8 @@ import { useParams, useRouter } from "next/navigation";
 import { FiChevronRight } from "react-icons/fi";
 import { useDispatch, useSelector } from "react-redux";
 
+import api from "@/lib/apiClient";
+
 import { fetchProduct } from "@/features/products/productSlice";
 import { addToCart } from "@/features/cart/cartSlice";
 
@@ -135,20 +137,57 @@ function getTouchDistance(touch1, touch2) {
   return Math.sqrt(dx * dx + dy * dy);
 }
 
+function getJwtPayload(token) {
+  try {
+    if (!token) return null;
+
+    const base64Url = token.split(".")[1];
+    if (!base64Url) return null;
+
+    const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
+    const jsonPayload = decodeURIComponent(
+      atob(base64)
+        .split("")
+        .map((char) => {
+          return "%" + ("00" + char.charCodeAt(0).toString(16)).slice(-2);
+        })
+        .join(""),
+    );
+
+    return JSON.parse(jsonPayload);
+  } catch {
+    return null;
+  }
+}
+
 export default function ProductPage() {
   const dispatch = useDispatch();
   const router = useRouter();
   const params = useParams();
 
   const id = params?.id;
+
   const product = useSelector((state) => state.products.product);
 
   const wishlistItems = useSelector((state) => state.wishlist.items);
+
+  const loggedInUser = useSelector(
+    (state) =>
+      state.auth?.user ||
+      state.auth?.currentUser ||
+      state.user?.user ||
+      state.account?.user ||
+      null,
+  );
 
   const [selectedMedia, setSelectedMedia] = useState("");
   const [zoomScale, setZoomScale] = useState(1);
   const [zoomPosition, setZoomPosition] = useState({ x: 0, y: 0 });
   const [openFaqIndex, setOpenFaqIndex] = useState(null);
+
+  const [reviewRating, setReviewRating] = useState("5");
+  const [reviewText, setReviewText] = useState("");
+  const [reviewSubmitting, setReviewSubmitting] = useState(false);
 
   const zoomStageRef = useRef(null);
   const videoRef = useRef(null);
@@ -198,6 +237,8 @@ export default function ProductPage() {
   const galleryMedia = useMemo(() => {
     if (!product?.images?.length) return [];
 
+    const seenUrls = new Set();
+
     return product.images
       .map((item) => {
         const rawUrl =
@@ -208,6 +249,16 @@ export default function ProductPage() {
         if (!rawUrl) return null;
 
         const url = getImageUrl(rawUrl);
+
+        const cleanKey = String(url)
+          .split("?")[0]
+          .split("#")[0]
+          .replace(/\/$/, "")
+          .toLowerCase();
+
+        if (seenUrls.has(cleanKey)) return null;
+        seenUrls.add(cleanKey);
+
         const type =
           typeof item === "object" && item?.mediaType
             ? String(item.mediaType).toLowerCase().includes("video")
@@ -222,7 +273,7 @@ export default function ProductPage() {
         };
       })
       .filter(Boolean);
-  }, [product]);
+  }, [product?.images, product?.title]);
 
   useEffect(() => {
     if (!galleryMedia.length) {
@@ -405,6 +456,65 @@ export default function ProductPage() {
     } catch (err) {
       console.error("Buy now failed:", err);
       alert("Failed to proceed to checkout");
+    }
+  };
+
+  const getLoggedInReviewerName = () => {
+    const token = getToken();
+    const tokenPayload = getJwtPayload(token);
+
+    return (
+      loggedInUser?.name ||
+      loggedInUser?.fullName ||
+      loggedInUser?.username ||
+      tokenPayload?.name ||
+      tokenPayload?.fullName ||
+      tokenPayload?.username ||
+      "Customer"
+    );
+  };
+
+  const handleSubmitReview = async () => {
+    const token = getToken();
+
+    if (!token) {
+      router.push("/login");
+      return;
+    }
+
+    if (!reviewText.trim()) {
+      alert("Please write your review");
+      return;
+    }
+
+    if (!product?.id) {
+      alert("Product not found");
+      return;
+    }
+
+    const data = {
+      reviewerName: getLoggedInReviewerName(),
+      rating: Number(reviewRating),
+      reviewText: reviewText.trim(),
+      featured: false,
+    };
+
+    setReviewSubmitting(true);
+
+    try {
+      await api.post(`/api/products/${product.id}/reviews`, data);
+
+      setReviewRating("5");
+      setReviewText("");
+
+      await dispatch(fetchProduct(id));
+
+      alert("Review submitted successfully");
+    } catch (err) {
+      console.error("Review submit failed:", err);
+      alert(err?.response?.data?.message || "Review submit failed");
+    } finally {
+      setReviewSubmitting(false);
     }
   };
 
@@ -800,7 +910,7 @@ export default function ProductPage() {
 
                         return (
                           <button
-                            key={`${media.url}-${i}`}
+                            key={media.url}
                             type="button"
                             onClick={() => handleMainThumbClick(media)}
                             className={`thumbnail-btn ${
@@ -1227,6 +1337,58 @@ export default function ProductPage() {
             </div>
           )}
 
+          <div className="submit-review-card">
+            <div className="submit-review-head">
+              <div>
+                <h2 className="submit-review-title">Write a Review</h2>
+                <p className="submit-review-subtitle">
+                  Share your experience with this product.
+                </p>
+              </div>
+
+              <div className="submit-review-user">
+                Reviewing as: <strong>{getLoggedInReviewerName()}</strong>
+              </div>
+            </div>
+
+            <div className="submit-review-form">
+              <div>
+                <label className="submit-review-label">Rating</label>
+                <select
+                  value={reviewRating}
+                  onChange={(e) => setReviewRating(e.target.value)}
+                  className="submit-review-select"
+                >
+                  <option value="5">5 Star</option>
+                  <option value="4">4 Star</option>
+                  <option value="3">3 Star</option>
+                  <option value="2">2 Star</option>
+                  <option value="1">1 Star</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="submit-review-label">Your Review</label>
+                <textarea
+                  value={reviewText}
+                  onChange={(e) => setReviewText(e.target.value)}
+                  rows={4}
+                  className="submit-review-textarea"
+                  placeholder="Write your review here..."
+                />
+              </div>
+
+              <button
+                type="button"
+                onClick={handleSubmitReview}
+                disabled={reviewSubmitting}
+                className="submit-review-btn"
+              >
+                {reviewSubmitting ? "Submitting..." : "Submit Review"}
+              </button>
+            </div>
+          </div>
+
           <div className="reviews-card">
             <div className="reviews-head">
               <h2 className="reviews-title">Customer Reviews</h2>
@@ -1312,6 +1474,113 @@ export default function ProductPage() {
 
         .product-gallery-card,
         .product-info-card,
+        .submit-review-card {
+          margin-top: 44px;
+          padding: 32px;
+          background: rgba(255, 255, 255, 0.92);
+          backdrop-filter: blur(12px);
+          border-radius: 28px;
+          border: 1px solid rgba(255, 255, 255, 0.75);
+          box-shadow:
+            0 10px 30px rgba(15, 23, 42, 0.05),
+            0 1px 2px rgba(15, 23, 42, 0.04),
+            inset 0 1px 0 rgba(255, 255, 255, 0.8);
+        }
+
+        .submit-review-head {
+          display: flex;
+          justify-content: space-between;
+          align-items: flex-start;
+          gap: 16px;
+          flex-wrap: wrap;
+          margin-bottom: 22px;
+        }
+
+        .submit-review-title {
+          margin: 0;
+          font-size: 28px;
+          color: #0f172a;
+          font-weight: 800;
+          letter-spacing: -0.03em;
+        }
+
+        .submit-review-subtitle {
+          margin: 8px 0 0;
+          color: #64748b;
+          font-size: 14px;
+          font-weight: 600;
+        }
+
+        .submit-review-user {
+          background: #f8fafc;
+          border: 1px solid rgba(226, 232, 240, 0.9);
+          color: #475569;
+          padding: 10px 14px;
+          border-radius: 999px;
+          font-size: 13px;
+          font-weight: 700;
+        }
+
+        .submit-review-form {
+          display: grid;
+          gap: 16px;
+        }
+
+        .submit-review-label {
+          display: block;
+          margin-bottom: 8px;
+          color: #0f172a;
+          font-size: 14px;
+          font-weight: 800;
+        }
+
+        .submit-review-select,
+        .submit-review-textarea {
+          width: 100%;
+          border: 1px solid rgba(203, 213, 225, 0.95);
+          background: #ffffff;
+          color: #0f172a;
+          border-radius: 16px;
+          padding: 14px 16px;
+          font-size: 15px;
+          font-family: inherit;
+          outline: none;
+        }
+
+        .submit-review-textarea {
+          resize: vertical;
+          line-height: 1.7;
+        }
+
+        .submit-review-select:focus,
+        .submit-review-textarea:focus {
+          border-color: #0f172a;
+          box-shadow: 0 0 0 3px rgba(15, 23, 42, 0.08);
+        }
+
+        .submit-review-btn {
+          width: fit-content;
+          border: none;
+          background: linear-gradient(135deg, #111827 0%, #1f2937 100%);
+          color: #ffffff;
+          padding: 14px 22px;
+          border-radius: 16px;
+          font-size: 15px;
+          font-weight: 800;
+          cursor: pointer;
+          box-shadow: 0 12px 24px rgba(17, 24, 39, 0.18);
+        }
+
+        .submit-review-btn:hover:not(:disabled) {
+          transform: translateY(-2px);
+        }
+
+        .submit-review-btn:disabled {
+          background: #9ca3af;
+          cursor: not-allowed;
+          box-shadow: none;
+        }
+
         .reviews-card,
         .details-card {
           background: rgba(255, 255, 255, 0.92);
@@ -2953,6 +3222,19 @@ export default function ProductPage() {
             font-size: 24px;
           }
 
+          .submit-review-card {
+            padding: 22px;
+            border-radius: 22px;
+          }
+
+          .submit-review-title {
+            font-size: 24px;
+          }
+
+          .submit-review-btn {
+            width: 100%;
+          }
+
           .reviews-summary {
             width: 100%;
             flex-wrap: wrap;
@@ -3232,6 +3514,86 @@ export default function ProductPage() {
         @media (max-width: 360px) {
           .product-title {
             font-size: 18px !important;
+          }
+        }
+
+        /* FINAL FIX: single clean thumbnail only */
+
+        .thumbnail-rail {
+          background: transparent !important;
+          border: none !important;
+          box-shadow: none !important;
+          padding: 0 !important;
+        }
+
+        .thumbnail-list {
+          gap: 10px !important;
+        }
+
+        .thumbnail-btn {
+          width: 100% !important;
+          height: 74px !important;
+          min-height: 74px !important;
+          aspect-ratio: auto !important;
+
+          display: flex !important;
+          align-items: center !important;
+          justify-content: center !important;
+
+          padding: 4px !important;
+          border-radius: 14px !important;
+          border: 1px solid #dbe3ee !important;
+          background: #ffffff !important;
+          overflow: hidden !important;
+
+          box-shadow: none !important;
+        }
+
+        /* remove inner double border */
+        .thumbnail-btn::before,
+        .thumbnail-btn::after {
+          display: none !important;
+          content: none !important;
+        }
+
+        .thumbnail-btn.active-thumb {
+          border: 2px solid #111827 !important;
+          box-shadow: none !important;
+        }
+
+        .thumbnail-img,
+        .thumbnail-video-wrap {
+          width: 100% !important;
+          height: 100% !important;
+          border-radius: 10px !important;
+          background: #ffffff !important;
+        }
+
+        .thumbnail-img {
+          object-fit: contain !important;
+          object-position: center !important;
+          padding: 3px !important;
+          display: block !important;
+        }
+
+        .thumbnail-video-wrap {
+          position: relative !important;
+          overflow: hidden !important;
+        }
+
+        .thumbnail-video-wrap .thumbnail-img {
+          padding: 0 !important;
+          object-fit: contain !important;
+        }
+
+        /* mobile */
+        @media (max-width: 767px) {
+          .thumbnail-btn {
+            min-width: 64px !important;
+            width: 64px !important;
+            flex: 0 0 64px !important;
+            height: 64px !important;
+            min-height: 64px !important;
           }
         }
       `}</style>
