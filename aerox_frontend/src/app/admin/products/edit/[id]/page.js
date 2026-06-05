@@ -705,51 +705,63 @@ export default function EditProductPage() {
   };
 
   const handleSaveReview = async () => {
-    if (!reviewerName.trim() || !reviewText.trim()) {
-      alert("Reviewer name and review text are required");
-      return;
-    }
+  if (!reviewerName.trim() || !reviewText.trim()) {
+    alert("Reviewer name and review text are required");
+    return;
+  }
 
-    const data = {
-      reviewerName,
-      rating: Number(rating),
-      reviewText,
-      featured,
-    };
-
-    try {
-      if (editingReviewId) {
-        const result = await dispatch(
-          updateProductReview({
-            productId,
-            reviewId: editingReviewId,
-            data,
-          }),
-        ).unwrap();
-
-        setReviews((prev) =>
-          prev.map((r) => (r.id === result.review.id ? result.review : r)),
-        );
-
-        alert("Review updated");
-      } else {
-        const result = await dispatch(
-          addProductReview({
-            productId,
-            data,
-          }),
-        ).unwrap();
-
-        setReviews((prev) => [result.review, ...prev]);
-        alert("Review added");
-      }
-
-      resetReviewForm();
-    } catch (err) {
-      console.error(err);
-      alert("Review save failed");
-    }
+  const data = {
+    reviewerName: reviewerName.trim(),
+    rating: Number(rating),
+    reviewText: reviewText.trim(),
+    featured,
   };
+
+  try {
+    if (editingReviewId) {
+      const result = await dispatch(
+        updateProductReview({
+          productId,
+          reviewId: editingReviewId,
+          data,
+        })
+      ).unwrap();
+
+      // Works for both response types:
+      // 1. direct review object
+      // 2. { review: reviewObject }
+      const savedReview = result?.review || result;
+
+      setReviews((prev) =>
+        prev.map((r) =>
+          Number(r.id) === Number(savedReview.id) ? savedReview : r
+        )
+      );
+
+      alert("Review updated");
+    } else {
+      const result = await dispatch(
+        addProductReview({
+          productId,
+          data,
+        })
+      ).unwrap();
+
+      // Works for both response types:
+      // 1. direct review object
+      // 2. { review: reviewObject }
+      const savedReview = result?.review || result;
+
+      setReviews((prev) => [savedReview, ...prev]);
+      alert("Review added");
+    }
+
+    resetReviewForm();
+  } catch (err) {
+    console.error(err);
+    alert(typeof err === "string" ? err : err?.message || "Review save failed");
+  }
+};
 
   const handleEditReview = (review) => {
     setEditingReviewId(review.id);
