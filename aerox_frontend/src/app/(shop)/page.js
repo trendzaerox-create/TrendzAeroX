@@ -74,7 +74,7 @@ export default function HomePage() {
   const newArrivals = useMemo(() => {
     return [...products]
       .sort((a, b) => Number(b.id) - Number(a.id))
-      .slice(0, 30);
+      .slice(0, 50);
   }, [products]);
 
   return (

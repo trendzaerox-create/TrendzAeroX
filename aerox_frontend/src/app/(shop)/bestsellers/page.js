@@ -2,7 +2,7 @@ import BestSellerSection from "@/components/home/BestSellerSection";
 
 async function getProducts() {
   try {
-    const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE}/api/products`, {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE}/api/products?page=0&size=50`, {
       cache: "no-store",
     });
 
@@ -26,7 +26,7 @@ async function getProducts() {
 export default async function BestSellersPage() {
   const products = await getProducts();
 
-  const bestSellerProducts = products.slice(0, 30);
+  const bestSellerProducts = products.slice(0, 50);
 
   return (
     <main className="relative overflow-hidden bg-[#f8f7f4] text-[#111111]">
