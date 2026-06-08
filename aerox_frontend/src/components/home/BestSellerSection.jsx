@@ -105,11 +105,7 @@ export default function BestSellerSection({ products = [] }) {
   return (
     <section className="relative overflow-hidden bg-white">
 
-      <div className="relative z-50 bg-yellow-200 p-3 text-sm font-bold text-black">
-        Filtered Product IDs: {debugIds}
-      </div>
-
-
+      
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(0,0,0,0.03),transparent_28%),radial-gradient(circle_at_bottom_right,rgba(0,0,0,0.04),transparent_34%)]" />
 
       <div className="relative mx-auto w-full max-w-[1280px] px-4 py-12 sm:px-6 sm:py-14 lg:max-w-full lg:px-3 lg:py-16 xl:px-4 2xl:px-8">
