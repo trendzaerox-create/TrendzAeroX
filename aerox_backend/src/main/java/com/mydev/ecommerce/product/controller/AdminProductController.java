@@ -1,12 +1,12 @@
 
 
-
 // package com.mydev.ecommerce.product.controller;
 
 // import com.mydev.ecommerce.category.repository.CategoryRepository;
 // import com.mydev.ecommerce.common.service.FileStorageService;
 // import com.mydev.ecommerce.product.dto.ProductRequest;
 // import com.mydev.ecommerce.product.dto.ProductReviewRequest;
+// import com.mydev.ecommerce.product.dto.ProductReviewResponse;
 // import com.mydev.ecommerce.product.model.Product;
 // import com.mydev.ecommerce.product.model.ProductImage;
 // import com.mydev.ecommerce.product.model.ProductReview;
@@ -83,8 +83,6 @@
 //         p.setMrpInr(req.mrpInr());
 //         p.setStock(req.stock());
 
-//         // If frontend sends displayOrder, use it.
-//         // If not, place new product at the end.
 //         p.setDisplayOrder(
 //                 req.displayOrder() == null
 //                         ? getNextDisplayOrder()
@@ -138,8 +136,6 @@
 //         p.setMrpInr(req.mrpInr());
 //         p.setStock(req.stock());
 
-//         // If frontend sends displayOrder, update it.
-//         // If not, keep existing order unchanged.
 //         if (req.displayOrder() != null) {
 //             p.setDisplayOrder(req.displayOrder());
 //         }
@@ -192,37 +188,41 @@
 //         productRepo.save(p);
 //     }
 
-//     @PostMapping("/{id}/reviews")
+//     @PostMapping("/{productId}/reviews")
 //     @Transactional
-//     public ProductReview addReview(@PathVariable Long id,
-//                                    @Valid @RequestBody ProductReviewRequest req) {
-//         Product product = productRepo.findById(id)
+//     public ProductReviewResponse addReview(@PathVariable Long productId,
+//                                            @Valid @RequestBody ProductReviewRequest req) {
+//         Product product = productRepo.findById(productId)
 //                 .orElseThrow(() -> new EntityNotFoundException("Product not found"));
 
 //         ProductReview review = new ProductReview();
 //         review.setProduct(product);
-//         review.setReviewerName(req.reviewerName());
+//         review.setReviewerName(req.reviewerName().trim());
 //         review.setRating(req.rating());
-//         review.setReviewText(req.reviewText());
+//         review.setReviewText(req.reviewText().trim());
 //         review.setFeatured(Boolean.TRUE.equals(req.featured()));
 
-//         return reviewRepo.save(review);
+//         ProductReview savedReview = reviewRepo.save(review);
+
+//         return mapReviewToResponse(savedReview);
 //     }
 
 //     @PutMapping("/{productId}/reviews/{reviewId}")
 //     @Transactional
-//     public ProductReview updateReview(@PathVariable Long productId,
-//                                       @PathVariable Long reviewId,
-//                                       @Valid @RequestBody ProductReviewRequest req) {
+//     public ProductReviewResponse updateReview(@PathVariable Long productId,
+//                                               @PathVariable Long reviewId,
+//                                               @Valid @RequestBody ProductReviewRequest req) {
 //         ProductReview review = reviewRepo.findByIdAndProductId(reviewId, productId)
 //                 .orElseThrow(() -> new EntityNotFoundException("Review not found"));
 
-//         review.setReviewerName(req.reviewerName());
+//         review.setReviewerName(req.reviewerName().trim());
 //         review.setRating(req.rating());
-//         review.setReviewText(req.reviewText());
+//         review.setReviewText(req.reviewText().trim());
 //         review.setFeatured(Boolean.TRUE.equals(req.featured()));
 
-//         return reviewRepo.save(review);
+//         ProductReview savedReview = reviewRepo.save(review);
+
+//         return mapReviewToResponse(savedReview);
 //     }
 
 //     @DeleteMapping("/{productId}/reviews/{reviewId}")
@@ -233,6 +233,16 @@
 //                 .orElseThrow(() -> new EntityNotFoundException("Review not found"));
 
 //         reviewRepo.delete(review);
+//     }
+
+//     private ProductReviewResponse mapReviewToResponse(ProductReview review) {
+//         return new ProductReviewResponse(
+//                 review.getId(),
+//                 review.getReviewerName(),
+//                 review.getRating(),
+//                 review.getReviewText(),
+//                 review.isFeatured()
+//         );
 //     }
 
 //     private void validatePricing(ProductRequest req) {
@@ -291,11 +301,28 @@
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 package com.mydev.ecommerce.product.controller;
 
 import com.mydev.ecommerce.category.repository.CategoryRepository;
 import com.mydev.ecommerce.common.service.FileStorageService;
 import com.mydev.ecommerce.product.dto.ProductRequest;
+import com.mydev.ecommerce.product.dto.ProductResponse;
 import com.mydev.ecommerce.product.dto.ProductReviewRequest;
 import com.mydev.ecommerce.product.dto.ProductReviewResponse;
 import com.mydev.ecommerce.product.model.Product;
@@ -303,6 +330,7 @@ import com.mydev.ecommerce.product.model.ProductImage;
 import com.mydev.ecommerce.product.model.ProductReview;
 import com.mydev.ecommerce.product.repository.ProductRepository;
 import com.mydev.ecommerce.product.repository.ProductReviewRepository;
+import com.mydev.ecommerce.product.service.ProductService;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
 import org.springframework.http.MediaType;
@@ -325,26 +353,45 @@ public class AdminProductController {
     private final CategoryRepository categoryRepo;
     private final ProductReviewRepository reviewRepo;
     private final FileStorageService fileStorageService;
+    private final ProductService productService;
 
-    public AdminProductController(ProductRepository productRepo,
-                                  CategoryRepository categoryRepo,
-                                  ProductReviewRepository reviewRepo,
-                                  FileStorageService fileStorageService) {
+    public AdminProductController(
+            ProductRepository productRepo,
+            CategoryRepository categoryRepo,
+            ProductReviewRepository reviewRepo,
+            FileStorageService fileStorageService,
+            ProductService productService
+    ) {
         this.productRepo = productRepo;
         this.categoryRepo = categoryRepo;
         this.reviewRepo = reviewRepo;
         this.fileStorageService = fileStorageService;
+        this.productService = productService;
     }
 
+    /*
+     * IMPORTANT:
+     * This admin list is now paginated.
+     * It does NOT load all products + all reviews at once.
+     *
+     * Example:
+     * /api/admin/products?page=0&size=50
+     */
     @GetMapping
-    public List<Product> list() {
-        return productRepo.findAllAdminWithImages();
+    public List<ProductResponse> list(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "50") int size
+    ) {
+        return productService.getAdminProducts(page, size);
     }
 
+    /*
+     * Admin product detail/edit page.
+     * Loads one product only.
+     */
     @GetMapping("/{id}")
-    public Product one(@PathVariable Long id) {
-        return productRepo.findAdminByIdWithImages(id)
-                .orElseThrow(() -> new EntityNotFoundException("Product not found"));
+    public ProductResponse one(@PathVariable Long id) {
+        return productService.getAdminProduct(id);
     }
 
     @PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
@@ -361,13 +408,14 @@ public class AdminProductController {
 
     @PostMapping
     @Transactional
-    public Product create(@Valid @RequestBody ProductRequest req) {
+    public ProductResponse create(@Valid @RequestBody ProductRequest req) {
         var cat = categoryRepo.findById(req.categoryId())
                 .orElseThrow(() -> new RuntimeException("Category not found"));
 
         validatePricing(req);
 
         Product p = new Product();
+
         p.setTitle(req.title());
         p.setDescription(req.description());
         p.setPriceInr(req.priceInr());
@@ -405,14 +453,17 @@ public class AdminProductController {
             }
         }
 
-        return productRepo.save(p);
+        Product savedProduct = productRepo.saveAndFlush(p);
+
+        return productService.getAdminProduct(savedProduct.getId());
     }
 
     @PutMapping("/{id}")
     @Transactional
-    public Product update(@PathVariable Long id,
-                          @Valid @RequestBody ProductRequest req) {
-
+    public ProductResponse update(
+            @PathVariable Long id,
+            @Valid @RequestBody ProductRequest req
+    ) {
         Product p = productRepo.findAdminByIdWithImages(id)
                 .orElseThrow(() -> new RuntimeException("Product not found"));
 
@@ -465,7 +516,9 @@ public class AdminProductController {
             }
         }
 
-        return productRepo.saveAndFlush(p);
+        Product savedProduct = productRepo.saveAndFlush(p);
+
+        return productService.getAdminProduct(savedProduct.getId());
     }
 
     @DeleteMapping("/{id}")
@@ -476,17 +529,21 @@ public class AdminProductController {
 
         p.setActive(false);
         p.setDeleted(true);
+
         productRepo.save(p);
     }
 
     @PostMapping("/{productId}/reviews")
     @Transactional
-    public ProductReviewResponse addReview(@PathVariable Long productId,
-                                           @Valid @RequestBody ProductReviewRequest req) {
+    public ProductReviewResponse addReview(
+            @PathVariable Long productId,
+            @Valid @RequestBody ProductReviewRequest req
+    ) {
         Product product = productRepo.findById(productId)
                 .orElseThrow(() -> new EntityNotFoundException("Product not found"));
 
         ProductReview review = new ProductReview();
+
         review.setProduct(product);
         review.setReviewerName(req.reviewerName().trim());
         review.setRating(req.rating());
@@ -500,9 +557,11 @@ public class AdminProductController {
 
     @PutMapping("/{productId}/reviews/{reviewId}")
     @Transactional
-    public ProductReviewResponse updateReview(@PathVariable Long productId,
-                                              @PathVariable Long reviewId,
-                                              @Valid @RequestBody ProductReviewRequest req) {
+    public ProductReviewResponse updateReview(
+            @PathVariable Long productId,
+            @PathVariable Long reviewId,
+            @Valid @RequestBody ProductReviewRequest req
+    ) {
         ProductReview review = reviewRepo.findByIdAndProductId(reviewId, productId)
                 .orElseThrow(() -> new EntityNotFoundException("Review not found"));
 
@@ -518,8 +577,10 @@ public class AdminProductController {
 
     @DeleteMapping("/{productId}/reviews/{reviewId}")
     @Transactional
-    public void deleteReview(@PathVariable Long productId,
-                             @PathVariable Long reviewId) {
+    public void deleteReview(
+            @PathVariable Long productId,
+            @PathVariable Long reviewId
+    ) {
         ProductReview review = reviewRepo.findByIdAndProductId(reviewId, productId)
                 .orElseThrow(() -> new EntityNotFoundException("Review not found"));
 
@@ -561,14 +622,17 @@ public class AdminProductController {
         }
 
         int uploadIndex = imageUrl.indexOf("/upload/");
+
         if (uploadIndex < 0) {
             return null;
         }
 
         String path = imageUrl.substring(uploadIndex + "/upload/".length());
+
         path = path.replaceFirst("^v\\d+/", "");
 
         int lastDot = path.lastIndexOf('.');
+
         if (lastDot > 0) {
             path = path.substring(0, lastDot);
         }
