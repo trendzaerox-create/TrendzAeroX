@@ -1,8 +1,6 @@
-
-
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import {
   addGiftSetCartItem,
@@ -36,6 +34,10 @@ function getGiftBoxImage(box) {
 
 export default function GiftSetBuilder({ products = [] }) {
   const dispatch = useDispatch();
+
+  const selectedItemsSectionRef = useRef(null);
+  const giftBoxSectionRef = useRef(null);
+  const shouldScrollToSelectedItemsRef = useRef(false);
 
   const { token, initialized: authInitialized } = useSelector(
     (state) => state.auth
@@ -96,16 +98,79 @@ export default function GiftSetBuilder({ products = [] }) {
 
   useEffect(() => {
     if (!activeProduct) return;
+
     if (selectedIds.has(activeProduct.id)) {
       setActiveProduct(null);
     }
   }, [selectedIds, activeProduct]);
 
+  // After clicking "Add to Your Gift Set"
+  // This scrolls to "Choose a gift box" section.
+  useEffect(() => {
+    if (!activeProduct) return;
+
+    const timer = setTimeout(() => {
+      const section = giftBoxSectionRef.current;
+
+      if (!section) return;
+
+      // Increase this value to scroll MORE down to gift box area.
+      // Try 120, 180, 220, 300.
+      const giftBoxExtraDown = 220;
+
+      const targetPosition =
+        section.getBoundingClientRect().top + window.scrollY + giftBoxExtraDown;
+
+      const maxScroll =
+        document.documentElement.scrollHeight - window.innerHeight;
+
+      window.scrollTo({
+        top: Math.min(targetPosition, maxScroll),
+        behavior: "smooth",
+      });
+    }, 300);
+
+    return () => clearTimeout(timer);
+  }, [activeProduct]);
+
+  // After clicking "Choose This Box"
+  // This scrolls back to "Your Selected Items" section.
+  useEffect(() => {
+    if (!shouldScrollToSelectedItemsRef.current) return;
+
+    const timer = setTimeout(() => {
+      const section = selectedItemsSectionRef.current;
+
+      if (!section) return;
+
+      // Increase this value to scroll MORE down inside selected items area.
+      // Try 60, 100, 120, 180.
+      const selectedItemsExtraDown = 120;
+
+      const targetPosition =
+        section.getBoundingClientRect().top +
+        window.scrollY +
+        selectedItemsExtraDown;
+
+      const maxScroll =
+        document.documentElement.scrollHeight - window.innerHeight;
+
+      window.scrollTo({
+        top: Math.min(targetPosition, maxScroll),
+        behavior: "smooth",
+      });
+
+      shouldScrollToSelectedItemsRef.current = false;
+    }, 350);
+
+    return () => clearTimeout(timer);
+  }, [selectedItems.length]);
+
   const handlePickProduct = (product) => {
     const alreadyAdded = selectedIds.has(product.id);
     const maxReached = !alreadyAdded && selectedItems.length >= 5;
 
-    if (maxReached) return;
+    if (alreadyAdded || maxReached) return;
 
     setActiveProduct(product);
   };
@@ -114,6 +179,11 @@ export default function GiftSetBuilder({ products = [] }) {
     const selectedBox = publicGiftBoxes.find((box) => box.id === giftBoxId);
 
     if (!selectedBox) return;
+
+    shouldScrollToSelectedItemsRef.current = true;
+
+    // Close gift box section immediately after choosing box.
+    setActiveProduct(null);
 
     if (!token) {
       dispatch(
@@ -130,7 +200,6 @@ export default function GiftSetBuilder({ products = [] }) {
         })
       );
 
-      setActiveProduct(null);
       return;
     }
 
@@ -143,8 +212,13 @@ export default function GiftSetBuilder({ products = [] }) {
           giftBoxId: Number(giftBoxId),
         })
       ).unwrap();
+    } catch (error) {
+      shouldScrollToSelectedItemsRef.current = false;
 
-      setActiveProduct(null);
+      // If add failed, open gift box section again.
+      setActiveProduct(product);
+
+      console.error("Failed to add gift set item", error);
     } finally {
       setAddingProductId(null);
     }
@@ -179,10 +253,13 @@ export default function GiftSetBuilder({ products = [] }) {
         <div className="absolute bottom-[-100px] right-[-80px] h-[260px] w-[260px] rounded-full bg-black/[0.04] blur-3xl" />
       </div>
 
-      <div className="relative mx-auto max-w-[1440px] px-4 py-6 md:px-6 lg:px-10 lg:py-8">
+      <div className="relative mx-auto max-w-[1440px] px-4 pb-44 pt-6 md:px-6 lg:px-10 lg:pb-52 lg:pt-8">
         <div className="grid grid-cols-1 gap-8 xl:grid-cols-[minmax(0,1fr)_390px] xl:items-start">
           <div className="space-y-8">
-            <div className="overflow-hidden rounded-[34px] border border-[#e9e9e9] bg-[linear-gradient(135deg,#ffffff_0%,#fcfcfc_38%,#f7f7f7_100%)] shadow-[0_20px_60px_rgba(0,0,0,0.05)]">
+            <div
+              ref={selectedItemsSectionRef}
+              className="overflow-hidden rounded-[34px] border border-[#e9e9e9] bg-[linear-gradient(135deg,#ffffff_0%,#fcfcfc_38%,#f7f7f7_100%)] shadow-[0_20px_60px_rgba(0,0,0,0.05)]"
+            >
               <div className="border-b border-[#efefef] px-5 py-5 md:px-7 md:py-6">
                 <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
                   <div className="max-w-2xl">
@@ -379,7 +456,10 @@ export default function GiftSetBuilder({ products = [] }) {
             </div>
 
             {activeProduct && (
-              <div className="overflow-hidden rounded-[34px] border border-[#e9e9e9] bg-[linear-gradient(180deg,#ffffff_0%,#fbfbfb_100%)] shadow-[0_18px_50px_rgba(0,0,0,0.05)]">
+              <div
+                ref={giftBoxSectionRef}
+                className="mb-40 overflow-hidden rounded-[34px] border border-[#e9e9e9] bg-[linear-gradient(180deg,#ffffff_0%,#fbfbfb_100%)] shadow-[0_18px_50px_rgba(0,0,0,0.05)]"
+              >
                 <div className="border-b border-[#efefef] px-5 py-5 md:px-7 md:py-6">
                   <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
                     <div>

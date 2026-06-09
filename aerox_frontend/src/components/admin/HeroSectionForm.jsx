@@ -73,19 +73,6 @@ const getProductOptionLabel = (product) => {
   return `#${product.id} - ${limitWords(getProductTitle(product), 14)}`;
 };
 
-  // const limitWords = (text, wordLimit = 10) => {
-  //   const words = String(text || "").trim().split(/\s+/);
-
-  //   if (words.length <= wordLimit) {
-  //     return text;
-  //   }
-
-  //   return `${words.slice(0, wordLimit).join(" ")}...`;
-  // };
-
-  // const getProductOptionLabel = (product) => {
-  //   return `#${product.id} - ${limitWords(getProductTitle(product), 10)}`;
-  // };
 
   const selectedProduct = products.find(
     (product) => String(product.id) === String(form.productId)
