@@ -1,7 +1,5 @@
 
 
-
-
 "use client";
 
 import { useEffect } from "react";
@@ -20,7 +18,9 @@ export default function EditHeroSectionPage() {
   const params = useParams();
   const id = params?.id;
 
-  const { currentItem, loadingCurrent } = useSelector((state) => state.heroSections);
+  const { currentItem, loadingCurrent } = useSelector(
+    (state) => state.heroSections
+  );
 
   useEffect(() => {
     if (id) {

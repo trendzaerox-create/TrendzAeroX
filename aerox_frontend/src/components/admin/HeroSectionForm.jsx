@@ -1,5 +1,3 @@
-
-
 "use client";
 
 import { useEffect, useState } from "react";
@@ -49,6 +47,49 @@ export default function HeroSectionForm({
       });
     }
   }, [initialData]);
+
+  const getProductTitle = (product) => {
+    return product?.title || product?.name || "Untitled Product";
+  };
+
+
+
+
+
+
+
+
+  const limitWords = (text, wordLimit = 14) => {
+  const words = String(text || "").trim().split(/\s+/);
+
+  if (words.length <= wordLimit) {
+    return text;
+  }
+
+  return `${words.slice(0, wordLimit).join(" ")}...`;
+};
+
+const getProductOptionLabel = (product) => {
+  return `#${product.id} - ${limitWords(getProductTitle(product), 14)}`;
+};
+
+  // const limitWords = (text, wordLimit = 10) => {
+  //   const words = String(text || "").trim().split(/\s+/);
+
+  //   if (words.length <= wordLimit) {
+  //     return text;
+  //   }
+
+  //   return `${words.slice(0, wordLimit).join(" ")}...`;
+  // };
+
+  // const getProductOptionLabel = (product) => {
+  //   return `#${product.id} - ${limitWords(getProductTitle(product), 10)}`;
+  // };
+
+  const selectedProduct = products.find(
+    (product) => String(product.id) === String(form.productId)
+  );
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -130,7 +171,8 @@ export default function HeroSectionForm({
           Hero Section Details
         </h2>
         <p className="mt-1 text-sm text-gray-500">
-          Fill in the details below to create or update your homepage hero banner.
+          Fill in the details below to create or update your homepage hero
+          banner.
         </p>
       </div>
 
@@ -141,45 +183,60 @@ export default function HeroSectionForm({
           </div>
         ) : null}
 
-        {/* Basic info */}
-        <div className="grid gap-6 lg:grid-cols-2">
-          <div className="space-y-2">
-            <label className="block text-sm font-semibold text-gray-800">
-              Hero Title
-            </label>
-            <input
-              type="text"
-              name="title"
-              value={form.title}
-              onChange={handleChange}
-              placeholder="Enter hero title"
-              className="w-full rounded-2xl border border-gray-300 bg-white px-4 py-3 text-sm text-gray-900 placeholder:text-gray-400 outline-none transition focus:border-black focus:ring-4 focus:ring-gray-100"
-            />
-          </div>
+        {/* Hero Title - full row */}
+        <div className="space-y-2">
+          <label className="block text-sm font-semibold text-gray-800">
+            Hero Title
+          </label>
+          <input
+            type="text"
+            name="title"
+            value={form.title}
+            onChange={handleChange}
+            placeholder="Enter hero title"
+            className="w-full rounded-2xl border border-gray-300 bg-white px-4 py-3 text-sm text-gray-900 placeholder:text-gray-400 outline-none transition focus:border-black focus:ring-4 focus:ring-gray-100"
+          />
+        </div>
 
-          <div className="space-y-2">
-            <label className="block text-sm font-semibold text-gray-800">
-              Linked Product
-            </label>
-            <select
-              name="productId"
-              value={form.productId}
-              onChange={handleChange}
-              className="w-full rounded-2xl border border-gray-300 bg-white px-4 py-3 text-sm text-gray-900 outline-none transition focus:border-black focus:ring-4 focus:ring-gray-100"
-            >
-              <option value="">Select product</option>
-              {products.map((product) => (
-                <option key={product.id} value={product.id}>
-                  {product.title || product.name || `Product #${product.id}`}
-                </option>
-              ))}
-            </select>
-            {loading ? (
-              <p className="text-xs font-medium text-gray-500">
-                Loading products...
-              </p>
-            ) : null}
-          </div>
+        {/* Linked Product - full row */}
+        <div className="space-y-2">
+          <label className="block text-sm font-semibold text-gray-800">
+            Linked Product
+          </label>
+
+          <select
+            name="productId"
+            value={form.productId}
+            onChange={handleChange}
+            className="w-full rounded-2xl border border-gray-300 bg-white px-4 py-3 text-sm text-gray-900 outline-none transition focus:border-black focus:ring-4 focus:ring-gray-100"
+          >
+            <option value="">Select product</option>
+
+            {products.map((product) => (
+              <option
+                key={product.id}
+                value={product.id}
+                title={`#${product.id} - ${getProductTitle(product)}`}
+              >
+                {getProductOptionLabel(product)}
+              </option>
+            ))}
+          </select>
+
+          {loading ? (
+            <p className="text-xs font-medium text-gray-500">
+              Loading products...
+            </p>
+          ) : selectedProduct ? (
+            <p className="max-w-full truncate text-xs text-gray-500">
+              Selected: #{selectedProduct.id} - {getProductTitle(selectedProduct)}
+            </p>
+          ) : (
+            <p className="text-xs text-gray-500">
+              Select the product that should open when customer clicks this hero
+              banner.
+            </p>
+          )}
         </div>
 
         {/* Description */}
@@ -197,7 +254,7 @@ export default function HeroSectionForm({
           />
         </div>
 
-        {/* Upload and sort */}
+        {/* Upload and Sort */}
         <div className="grid gap-6 lg:grid-cols-2">
           <div className="space-y-2">
             <label className="block text-sm font-semibold text-gray-800">
@@ -209,8 +266,11 @@ export default function HeroSectionForm({
               onChange={handleImageUpload}
               className="w-full rounded-2xl border border-gray-300 bg-white px-4 py-3 text-sm text-gray-700 file:mr-4 file:rounded-full file:border-0 file:bg-black file:px-4 file:py-2 file:text-sm file:font-medium file:text-white hover:file:bg-gray-800"
             />
+
             {uploading ? (
-              <p className="text-xs font-medium text-gray-500">Uploading image...</p>
+              <p className="text-xs font-medium text-gray-500">
+                Uploading image...
+              </p>
             ) : (
               <p className="text-xs text-gray-500">
                 Upload a clean, high-quality hero image for the homepage banner.
@@ -240,7 +300,9 @@ export default function HeroSectionForm({
         {form.imageUrl ? (
           <div className="overflow-hidden rounded-[24px] border border-gray-200 bg-gray-50">
             <div className="border-b border-gray-200 px-4 py-3">
-              <h3 className="text-sm font-semibold text-gray-800">Image Preview</h3>
+              <h3 className="text-sm font-semibold text-gray-800">
+                Image Preview
+              </h3>
             </div>
             <img
               src={form.imageUrl}
@@ -286,3 +348,6 @@ export default function HeroSectionForm({
     </form>
   );
 }
+
+
+
