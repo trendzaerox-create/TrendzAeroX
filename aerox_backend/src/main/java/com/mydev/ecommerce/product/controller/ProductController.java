@@ -1,6 +1,4 @@
 
-
-
 // package com.mydev.ecommerce.product.controller;
 
 // import com.mydev.ecommerce.product.dto.ProductResponse;
@@ -37,9 +35,11 @@
 
 //     @GetMapping
 //     public List<ProductResponse> list(
-//             @RequestParam(required = false) Long categoryId
+//             @RequestParam(required = false) Long categoryId,
+//             @RequestParam(defaultValue = "0") int page,
+//             @RequestParam(defaultValue = "30") int size
 //     ) {
-//         return service.getProducts(categoryId);
+//         return service.getProducts(categoryId, page, size);
 //     }
 
 //     @GetMapping("/{id}")
@@ -58,9 +58,9 @@
 
 //         ProductReview review = new ProductReview();
 //         review.setProduct(product);
-//         review.setReviewerName(req.reviewerName());
+//         review.setReviewerName(req.reviewerName().trim());
 //         review.setRating(req.rating());
-//         review.setReviewText(req.reviewText());
+//         review.setReviewText(req.reviewText().trim());
 //         review.setFeatured(false);
 
 //         return reviewRepo.save(review);
@@ -78,33 +78,11 @@
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 package com.mydev.ecommerce.product.controller;
 
 import com.mydev.ecommerce.product.dto.ProductResponse;
 import com.mydev.ecommerce.product.dto.ProductReviewRequest;
+import com.mydev.ecommerce.product.dto.ProductReviewResponse;
 import com.mydev.ecommerce.product.model.Product;
 import com.mydev.ecommerce.product.model.ProductReview;
 import com.mydev.ecommerce.product.repository.ProductRepository;
@@ -151,7 +129,7 @@ public class ProductController {
 
     @PostMapping("/{id}/reviews")
     @Transactional
-    public ProductReview addCustomerReview(
+    public ProductReviewResponse addCustomerReview(
             @PathVariable Long id,
             @Valid @RequestBody ProductReviewRequest req
     ) {
@@ -163,8 +141,18 @@ public class ProductController {
         review.setReviewerName(req.reviewerName().trim());
         review.setRating(req.rating());
         review.setReviewText(req.reviewText().trim());
+
+        // Public customer review should not control featured value
         review.setFeatured(false);
 
-        return reviewRepo.save(review);
+        ProductReview savedReview = reviewRepo.save(review);
+
+        return new ProductReviewResponse(
+                savedReview.getId(),
+                savedReview.getReviewerName(),
+                savedReview.getRating(),
+                savedReview.getReviewText(),
+                savedReview.isFeatured()
+        );
     }
 }
