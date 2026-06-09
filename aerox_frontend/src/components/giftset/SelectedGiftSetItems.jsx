@@ -1,5 +1,7 @@
 
 "use client";
+import { FaGift } from "react-icons/fa6";
+
 
 function getItemImage(item) {
   if (item?.productImageUrl) return item.productImageUrl;
@@ -20,9 +22,9 @@ export default function SelectedGiftSetItems({ items, onRemove }) {
     return (
       <div className="overflow-hidden rounded-[30px] border border-dashed border-[#d9d9d9] bg-[linear-gradient(180deg,#ffffff_0%,#fafafa_100%)] px-6 py-12 text-center shadow-[0_10px_30px_rgba(0,0,0,0.03)]">
         <div className="mx-auto flex max-w-md flex-col items-center">
-          <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-full border border-[#ececec] bg-white text-xl shadow-sm">
-            🎁
-          </div>
+          <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-full border border-[#ececec] bg-white text-xl text-[#111] shadow-sm">
+  <FaGift className="h-6 w-6" />
+</div>
           <h3 className="text-lg font-semibold tracking-[0.02em] text-[#111]">
             Your gift set is empty
           </h3>

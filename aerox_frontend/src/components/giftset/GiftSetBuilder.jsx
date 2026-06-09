@@ -278,34 +278,39 @@ export default function GiftSetBuilder({ products = [] }) {
                     </p>
                   </div>
 
-                  <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-                    <div className="rounded-[22px] border border-[#ececec] bg-white px-4 py-4 text-center shadow-sm">
-                      <p className="text-[11px] uppercase tracking-[0.2em] text-[#8a8a8a]">
-                        Selected
-                      </p>
-                      <p className="mt-2 text-2xl font-semibold text-[#111]">
-                        {totalSelected}
-                      </p>
-                    </div>
+                 <div className="w-full overflow-x-auto pb-1">
+  <div className="grid min-w-[360px] grid-cols-3 gap-4">
+    <div className="min-h-[96px] rounded-[24px] border border-[#ececec] bg-white px-5 py-5 text-center shadow-sm">
+      <p className="whitespace-nowrap text-[11px] uppercase tracking-[0.14em] text-[#8a8a8a]">
+        Selected
+      </p>
 
-                    <div className="rounded-[22px] border border-[#ececec] bg-white px-4 py-4 text-center shadow-sm">
-                      <p className="text-[11px] uppercase tracking-[0.2em] text-[#8a8a8a]">
-                        Limit
-                      </p>
-                      <p className="mt-2 text-2xl font-semibold text-[#111]">
-                        5
-                      </p>
-                    </div>
+      <p className="mt-3 text-2xl font-semibold text-[#111]">
+        {totalSelected}
+      </p>
+    </div>
 
-                    <div className="col-span-2 rounded-[22px] border border-[#ececec] bg-white px-4 py-4 text-center shadow-sm sm:col-span-1">
-                      <p className="text-[11px] uppercase tracking-[0.2em] text-[#8a8a8a]">
-                        Status
-                      </p>
-                      <p className="mt-2 text-sm font-semibold text-[#111]">
-                        {maxReached ? "Maximum Reached" : "Building"}
-                      </p>
-                    </div>
-                  </div>
+    <div className="min-h-[96px] rounded-[24px] border border-[#ececec] bg-white px-5 py-5 text-center shadow-sm">
+      <p className="whitespace-nowrap text-[11px] uppercase tracking-[0.14em] text-[#8a8a8a]">
+        Limit
+      </p>
+
+      <p className="mt-3 text-2xl font-semibold text-[#111]">
+        5
+      </p>
+    </div>
+
+    <div className="min-h-[96px] rounded-[24px] border border-[#ececec] bg-white px-5 py-5 text-center shadow-sm">
+      <p className="whitespace-nowrap text-[11px] uppercase tracking-[0.14em] text-[#8a8a8a]">
+        Status
+      </p>
+
+      <p className="mt-3 text-sm font-semibold leading-5 text-[#111]">
+        {maxReached ? "Maximum Reached" : "Building"}
+      </p>
+    </div>
+  </div>
+</div>
                 </div>
               </div>
 
