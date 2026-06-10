@@ -43,14 +43,12 @@ export default function ProductCard({ product }) {
           {/* Price */}
           <div className="mt-1 flex flex-wrap items-center gap-1 text-[12px] leading-none sm:mt-1.5 sm:gap-1 sm:text-[13px]">
             {mrp > 0 && (
-              <span className="font-medium text-neutral-500 line-through">
+              <span className="text-[20px] font-bold text-neutral-500 line-through">
                 ₹{mrp.toLocaleString("en-IN")}
               </span>
             )}
 
-            <span className="font-bold text-black">
-              ₹{sellingPrice.toLocaleString("en-IN")}
-            </span>
+            
 
             {discountPercent > 0 && (
               <span className="font-bold text-green-700">
@@ -62,13 +60,22 @@ export default function ProductCard({ product }) {
           {/* Offer Row - hidden on mobile */}
           {discountPercent > 0 && (
             <div className="mt-1.5 hidden items-center gap-1 sm:flex">
-              <span className="flex h-4 w-4 items-center justify-center rounded-full bg-[#c69b2d] text-[9px] text-white">
-                %
-              </span>
 
-              <span className="line-clamp-1 text-[12px] font-semibold text-green-700">
-                Special Offer Available
-              </span>
+            <div className="mt-1.5 flex flex-col items-start gap-1">
+  <span className="font-bold text-black">
+    ₹{sellingPrice.toLocaleString("en-IN")}
+  </span>
+
+  <div className="flex items-center gap-1.5">
+    <span className="flex h-4 w-4 items-center justify-center rounded-full bg-[#c69b2d] text-[9px] font-bold text-white">
+      %
+    </span>
+
+    <span className="line-clamp-1 text-[12px] font-semibold text-green-700">
+      Special Offer Available
+    </span>
+  </div>
+</div>
             </div>
           )}
         </div>
