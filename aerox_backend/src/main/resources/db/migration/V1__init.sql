@@ -1,383 +1,567 @@
 -- =========================================
--- V1__init.sql
--- COMPLETE SINGLE MIGRATION FILE
+-- V1__complete_init.sql
+-- COMPLETE SINGLE, IDEMPOTENT MIGRATION FILE
+-- PostgreSQL
 -- =========================================
 
-create table if not exists users (
-  id bigserial primary key,
-  name varchar(120) not null,
-  email varchar(180) unique not null,
-  password_hash varchar(255) not null,
-  role varchar(30) not null default 'CUSTOMER',
-  phone varchar(20),
-  created_at timestamptz not null default now()
+-- Flyway executes PostgreSQL migrations transactionally by default.
+
+-- =========================================
+-- CORE TABLES
+-- =========================================
+
+CREATE TABLE IF NOT EXISTS users (
+  id BIGSERIAL PRIMARY KEY,
+  name VARCHAR(120) NOT NULL,
+  email VARCHAR(180) UNIQUE NOT NULL,
+  password_hash VARCHAR(255) NOT NULL,
+  role VARCHAR(30) NOT NULL DEFAULT 'CUSTOMER',
+  phone VARCHAR(20),
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
-create table if not exists categories (
-  id bigserial primary key,
-  name varchar(120) unique not null
+CREATE TABLE IF NOT EXISTS categories (
+  id BIGSERIAL PRIMARY KEY,
+  name VARCHAR(120) UNIQUE NOT NULL
 );
 
-create table if not exists products (
-  id bigserial primary key,
-  title varchar(200) not null,
-  description text,
-  price_inr integer not null,
-  mrp_inr integer,
-  stock integer not null default 0,
-  category_id bigint references categories(id),
-  created_at timestamptz not null default now(),
-  is_active boolean not null default true,
-  is_deleted boolean not null default false
+CREATE TABLE IF NOT EXISTS products (
+  id BIGSERIAL PRIMARY KEY,
+  title VARCHAR(200) NOT NULL,
+  description TEXT,
+  price_inr INTEGER NOT NULL,
+  mrp_inr INTEGER,
+  stock INTEGER NOT NULL DEFAULT 0,
+  category_id BIGINT REFERENCES categories(id),
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  is_active BOOLEAN NOT NULL DEFAULT TRUE,
+  is_deleted BOOLEAN NOT NULL DEFAULT FALSE
 );
 
-create table if not exists product_images (
-  id bigserial primary key,
-  product_id bigint not null references products(id) on delete cascade,
-  image_url varchar(500) not null,
-  cloudinary_public_id varchar(255)
+CREATE TABLE IF NOT EXISTS product_images (
+  id BIGSERIAL PRIMARY KEY,
+  product_id BIGINT NOT NULL REFERENCES products(id) ON DELETE CASCADE,
+  image_url VARCHAR(500) NOT NULL,
+  cloudinary_public_id VARCHAR(255)
 );
 
-create table if not exists addresses (
-  id bigserial primary key,
-  user_id bigint not null references users(id) on delete cascade,
-  full_name varchar(120) not null,
-  phone varchar(20) not null,
-  line1 varchar(255) not null,
-  line2 varchar(255),
-  city varchar(120) not null,
-  state varchar(120) not null,
-  pincode varchar(20) not null,
-  country varchar(80) not null default 'India',
-  is_default boolean not null default false,
-  created_at timestamptz not null default now(),
-  updated_at timestamptz not null default now()
+CREATE TABLE IF NOT EXISTS addresses (
+  id BIGSERIAL PRIMARY KEY,
+  user_id BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  full_name VARCHAR(120) NOT NULL,
+  phone VARCHAR(20) NOT NULL,
+  line1 VARCHAR(255) NOT NULL,
+  line2 VARCHAR(255),
+  city VARCHAR(120) NOT NULL,
+  state VARCHAR(120) NOT NULL,
+  pincode VARCHAR(20) NOT NULL,
+  country VARCHAR(80) NOT NULL DEFAULT 'India',
+  is_default BOOLEAN NOT NULL DEFAULT FALSE,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
-create table if not exists gift_boxes (
-  id bigserial primary key,
-  name varchar(120) not null,
-  description text,
-  price_inr integer not null,
-  image_path varchar(500),
-  cloudinary_public_id varchar(255),
-  stock integer not null default 0,
-  is_active boolean not null default true,
-  is_deleted boolean not null default false,
-  created_at timestamptz not null default current_timestamp,
-  updated_at timestamptz
+CREATE TABLE IF NOT EXISTS gift_boxes (
+  id BIGSERIAL PRIMARY KEY,
+  name VARCHAR(120) NOT NULL,
+  description TEXT,
+  price_inr INTEGER NOT NULL,
+  image_path VARCHAR(500),
+  cloudinary_public_id VARCHAR(255),
+  stock INTEGER NOT NULL DEFAULT 0,
+  is_active BOOLEAN NOT NULL DEFAULT TRUE,
+  is_deleted BOOLEAN NOT NULL DEFAULT FALSE,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMPTZ
 );
 
-create table if not exists carts (
-  id bigserial primary key,
-  user_id bigint not null unique references users(id) on delete cascade,
-  created_at timestamptz not null default now(),
-  updated_at timestamptz not null default now()
+CREATE TABLE IF NOT EXISTS carts (
+  id BIGSERIAL PRIMARY KEY,
+  user_id BIGINT NOT NULL UNIQUE REFERENCES users(id) ON DELETE CASCADE,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
-create table if not exists cart_items (
-  id bigserial primary key,
-  cart_id bigint not null references carts(id) on delete cascade,
-  product_id bigint not null references products(id),
-  quantity integer not null,
-  unit_price_snapshot numeric(12,2) not null,
-  created_at timestamptz not null default now(),
-  updated_at timestamptz not null default now()
+CREATE TABLE IF NOT EXISTS cart_items (
+  id BIGSERIAL PRIMARY KEY,
+  cart_id BIGINT NOT NULL REFERENCES carts(id) ON DELETE CASCADE,
+  product_id BIGINT NOT NULL REFERENCES products(id),
+  quantity INTEGER NOT NULL,
+  unit_price_snapshot NUMERIC(12,2) NOT NULL,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
-create table if not exists orders (
-  id bigserial primary key,
-  order_number varchar(50) not null unique,
-  user_id bigint not null references users(id) on delete cascade,
-  payment_method varchar(30) not null,
-  payment_status varchar(30) not null default 'PENDING',
-  status varchar(30) not null,
-  razorpay_order_id varchar(100),
-  razorpay_payment_id varchar(100),
-  razorpay_signature varchar(255),
-  subtotal_amount numeric(12,2) not null,
-  shipping_amount numeric(12,2) not null,
-  discount_amount numeric(12,2) not null default 0,
-  total_amount numeric(12,2) not null,
-  coupon_code varchar(50),
-  address_full_name varchar(120) not null,
-  address_phone varchar(20) not null,
-  address_line1 varchar(255) not null,
-  address_line2 varchar(255),
-  address_city varchar(120) not null,
-  address_state varchar(120) not null,
-  address_pincode varchar(20) not null,
-  address_country varchar(80) not null,
-  created_at timestamptz not null default now()
+CREATE TABLE IF NOT EXISTS orders (
+  id BIGSERIAL PRIMARY KEY,
+  order_number VARCHAR(50) NOT NULL UNIQUE,
+  user_id BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  payment_method VARCHAR(30) NOT NULL,
+  payment_status VARCHAR(30) NOT NULL DEFAULT 'PENDING',
+  status VARCHAR(30) NOT NULL,
+  razorpay_order_id VARCHAR(100),
+  razorpay_payment_id VARCHAR(100),
+  razorpay_signature VARCHAR(255),
+  subtotal_amount NUMERIC(12,2) NOT NULL,
+  shipping_amount NUMERIC(12,2) NOT NULL,
+  discount_amount NUMERIC(12,2) NOT NULL DEFAULT 0,
+  total_amount NUMERIC(12,2) NOT NULL,
+  coupon_code VARCHAR(50),
+  address_full_name VARCHAR(120) NOT NULL,
+  address_phone VARCHAR(20) NOT NULL,
+  address_line1 VARCHAR(255) NOT NULL,
+  address_line2 VARCHAR(255),
+  address_city VARCHAR(120) NOT NULL,
+  address_state VARCHAR(120) NOT NULL,
+  address_pincode VARCHAR(20) NOT NULL,
+  address_country VARCHAR(80) NOT NULL,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
-create table if not exists order_items (
-  id bigserial primary key,
-  order_id bigint not null references orders(id) on delete cascade,
-  product_id bigint not null references products(id),
-  product_title varchar(200) not null,
-  image_url varchar(500),
-  quantity integer not null,
-  unit_price numeric(12,2) not null,
-  line_total numeric(12,2) not null
+CREATE TABLE IF NOT EXISTS order_items (
+  id BIGSERIAL PRIMARY KEY,
+  order_id BIGINT NOT NULL REFERENCES orders(id) ON DELETE CASCADE,
+  product_id BIGINT NOT NULL REFERENCES products(id),
+  product_title VARCHAR(200) NOT NULL,
+  image_url VARCHAR(500),
+  quantity INTEGER NOT NULL,
+  unit_price NUMERIC(12,2) NOT NULL,
+  line_total NUMERIC(12,2) NOT NULL
 );
 
-create table if not exists product_reviews (
-  id bigserial primary key,
-  product_id bigint not null references products(id) on delete cascade,
-  reviewer_name varchar(120) not null,
-  rating integer not null check (rating >= 1 and rating <= 5),
-  review_text text not null,
-  is_featured boolean not null default false,
-  created_at timestamptz not null default now(),
-  updated_at timestamptz not null default now()
+CREATE TABLE IF NOT EXISTS product_reviews (
+  id BIGSERIAL PRIMARY KEY,
+  product_id BIGINT NOT NULL REFERENCES products(id) ON DELETE CASCADE,
+  reviewer_name VARCHAR(120) NOT NULL,
+  rating INTEGER NOT NULL CHECK (rating >= 1 AND rating <= 5),
+  review_text TEXT NOT NULL,
+  is_featured BOOLEAN NOT NULL DEFAULT FALSE,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
-create table if not exists coupons (
-  id bigserial primary key,
-  code varchar(50) unique not null,
-  description varchar(255),
-  discount_type varchar(20) not null,
-  discount_value numeric(12,2) not null,
-  min_order_value numeric(12,2),
-  max_discount numeric(12,2),
-  usage_limit int,
-  used_count int not null default 0,
-  active boolean not null default true,
-  starts_at timestamptz,
-  ends_at timestamptz,
-  created_at timestamptz not null default now()
+CREATE TABLE IF NOT EXISTS coupons (
+  id BIGSERIAL PRIMARY KEY,
+  code VARCHAR(50) UNIQUE NOT NULL,
+  description VARCHAR(255),
+  discount_type VARCHAR(20) NOT NULL,
+  discount_value NUMERIC(12,2) NOT NULL,
+  min_order_value NUMERIC(12,2),
+  max_discount NUMERIC(12,2),
+  usage_limit INT,
+  used_count INT NOT NULL DEFAULT 0,
+  active BOOLEAN NOT NULL DEFAULT TRUE,
+  starts_at TIMESTAMPTZ,
+  ends_at TIMESTAMPTZ,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
-create table if not exists coupon_usages (
-  id bigserial primary key,
-  coupon_id bigint not null references coupons(id),
-  user_id bigint not null references users(id),
-  order_id bigint references orders(id),
-  used_at timestamptz not null default now()
+CREATE TABLE IF NOT EXISTS coupon_usages (
+  id BIGSERIAL PRIMARY KEY,
+  coupon_id BIGINT NOT NULL REFERENCES coupons(id),
+  user_id BIGINT NOT NULL REFERENCES users(id),
+  order_id BIGINT REFERENCES orders(id),
+  used_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
-create table if not exists brand_showcases (
-  id bigserial primary key,
-  title varchar(200) not null,
-  subtitle varchar(500),
-  model_image_url varchar(500) not null,
-  cloudinary_public_id varchar(255),
-  display_order integer not null default 0,
-  is_active boolean not null default true,
-  is_deleted boolean not null default false,
-  created_at timestamptz not null default now(),
-  updated_at timestamptz
+CREATE TABLE IF NOT EXISTS brand_showcases (
+  id BIGSERIAL PRIMARY KEY,
+  title VARCHAR(200) NOT NULL,
+  subtitle VARCHAR(500),
+  model_image_url VARCHAR(500) NOT NULL,
+  cloudinary_public_id VARCHAR(255),
+  display_order INTEGER NOT NULL DEFAULT 0,
+  is_active BOOLEAN NOT NULL DEFAULT TRUE,
+  is_deleted BOOLEAN NOT NULL DEFAULT FALSE,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at TIMESTAMPTZ
 );
 
-create table if not exists brand_showcase_items (
-  id bigserial primary key,
-  brand_showcase_id bigint not null references brand_showcases(id),
-  product_id bigint not null references products(id),
-  display_order integer not null default 0
+CREATE TABLE IF NOT EXISTS brand_showcase_items (
+  id BIGSERIAL PRIMARY KEY,
+  brand_showcase_id BIGINT NOT NULL REFERENCES brand_showcases(id),
+  product_id BIGINT NOT NULL REFERENCES products(id),
+  display_order INTEGER NOT NULL DEFAULT 0
 );
 
-create table if not exists hero_sections (
-  id bigserial primary key,
-  title varchar(200) not null,
-  description text,
-  image_url varchar(500) not null,
-  cloudinary_public_id varchar(255),
-  product_id bigint not null references products(id),
-  sort_order integer not null default 0,
-  is_active boolean not null default true,
-  is_deleted boolean not null default false,
-  created_at timestamptz not null default now(),
-  updated_at timestamptz not null default now()
+CREATE TABLE IF NOT EXISTS hero_sections (
+  id BIGSERIAL PRIMARY KEY,
+  title VARCHAR(200) NOT NULL,
+  description TEXT,
+  image_url VARCHAR(500) NOT NULL,
+  cloudinary_public_id VARCHAR(255),
+  product_id BIGINT NOT NULL REFERENCES products(id),
+  sort_order INTEGER NOT NULL DEFAULT 0,
+  is_active BOOLEAN NOT NULL DEFAULT TRUE,
+  is_deleted BOOLEAN NOT NULL DEFAULT FALSE,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
-create table if not exists gift_set_carts (
-  id bigserial primary key,
-  user_id bigint not null unique references users(id),
-  created_at timestamptz not null default now(),
-  updated_at timestamptz not null default now()
+CREATE TABLE IF NOT EXISTS gift_set_carts (
+  id BIGSERIAL PRIMARY KEY,
+  user_id BIGINT NOT NULL UNIQUE REFERENCES users(id),
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
-create table if not exists gift_set_cart_items (
-  id bigserial primary key,
-  gift_set_cart_id bigint not null references gift_set_carts(id) on delete cascade,
-  product_id bigint not null references products(id),
-  gift_box_id bigint not null references gift_boxes(id),
-  product_price_snapshot integer not null,
-  gift_box_price_snapshot integer not null,
-  created_at timestamptz not null default now(),
-  updated_at timestamptz not null default now(),
-  constraint uk_gift_set_cart_product unique (gift_set_cart_id, product_id)
+CREATE TABLE IF NOT EXISTS gift_set_cart_items (
+  id BIGSERIAL PRIMARY KEY,
+  gift_set_cart_id BIGINT NOT NULL REFERENCES gift_set_carts(id) ON DELETE CASCADE,
+  product_id BIGINT NOT NULL REFERENCES products(id),
+  gift_box_id BIGINT NOT NULL REFERENCES gift_boxes(id),
+  product_price_snapshot INTEGER NOT NULL,
+  gift_box_price_snapshot INTEGER NOT NULL,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  CONSTRAINT uk_gift_set_cart_product UNIQUE (gift_set_cart_id, product_id)
 );
 
-create table if not exists gift_set_orders (
-  id bigserial primary key,
-  order_number varchar(50) not null unique,
-  user_id bigint not null references users(id),
-  payment_method varchar(30) not null,
-  payment_status varchar(30) not null,
-  status varchar(30) not null,
-  razorpay_order_id varchar(100),
-  razorpay_payment_id varchar(100),
-  razorpay_signature varchar(255),
-  subtotal_amount numeric(12,2) not null,
-  shipping_amount numeric(12,2) not null,
-  discount_amount numeric(12,2) not null,
-  total_amount numeric(12,2) not null,
-  coupon_code varchar(50),
-  address_full_name varchar(120) not null,
-  address_phone varchar(20) not null,
-  address_line1 varchar(255) not null,
-  address_line2 varchar(255),
-  address_city varchar(120) not null,
-  address_state varchar(120) not null,
-  address_pincode varchar(20) not null,
-  address_country varchar(80) not null,
-  created_at timestamptz not null default now()
+CREATE TABLE IF NOT EXISTS gift_set_orders (
+  id BIGSERIAL PRIMARY KEY,
+  order_number VARCHAR(50) NOT NULL UNIQUE,
+  user_id BIGINT NOT NULL REFERENCES users(id),
+  payment_method VARCHAR(30) NOT NULL,
+  payment_status VARCHAR(30) NOT NULL,
+  status VARCHAR(30) NOT NULL,
+  razorpay_order_id VARCHAR(100),
+  razorpay_payment_id VARCHAR(100),
+  razorpay_signature VARCHAR(255),
+  subtotal_amount NUMERIC(12,2) NOT NULL,
+  shipping_amount NUMERIC(12,2) NOT NULL,
+  discount_amount NUMERIC(12,2) NOT NULL,
+  total_amount NUMERIC(12,2) NOT NULL,
+  coupon_code VARCHAR(50),
+  address_full_name VARCHAR(120) NOT NULL,
+  address_phone VARCHAR(20) NOT NULL,
+  address_line1 VARCHAR(255) NOT NULL,
+  address_line2 VARCHAR(255),
+  address_city VARCHAR(120) NOT NULL,
+  address_state VARCHAR(120) NOT NULL,
+  address_pincode VARCHAR(20) NOT NULL,
+  address_country VARCHAR(80) NOT NULL,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
-create table if not exists gift_set_order_items (
-  id bigserial primary key,
-  gift_set_order_id bigint not null references gift_set_orders(id) on delete cascade,
-  product_id bigint not null references products(id),
-  product_title varchar(200) not null,
-  product_image_url varchar(500),
-  product_price_snapshot numeric(12,2) not null,
-  gift_box_id bigint not null references gift_boxes(id),
-  gift_box_name varchar(200) not null,
-  gift_box_image_url varchar(500),
-  gift_box_price_snapshot numeric(12,2) not null,
-  line_total numeric(12,2) not null,
-  created_at timestamptz not null default now()
+CREATE TABLE IF NOT EXISTS gift_set_order_items (
+  id BIGSERIAL PRIMARY KEY,
+  gift_set_order_id BIGINT NOT NULL REFERENCES gift_set_orders(id) ON DELETE CASCADE,
+  product_id BIGINT NOT NULL REFERENCES products(id),
+  product_title VARCHAR(200) NOT NULL,
+  product_image_url VARCHAR(500),
+  product_price_snapshot NUMERIC(12,2) NOT NULL,
+  gift_box_id BIGINT NOT NULL REFERENCES gift_boxes(id),
+  gift_box_name VARCHAR(200) NOT NULL,
+  gift_box_image_url VARCHAR(500),
+  gift_box_price_snapshot NUMERIC(12,2) NOT NULL,
+  line_total NUMERIC(12,2) NOT NULL,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
-create table if not exists bulk_order_inquiries (
-  id bigserial primary key,
-  product_id bigint not null references products(id),
-  customer_name varchar(120) not null,
-  email varchar(160) not null,
-  phone varchar(30) not null,
-  company_name varchar(160),
-  quantity integer not null,
-  message text,
-  status varchar(30) not null default 'NEW',
-  created_at timestamptz not null default now()
+CREATE TABLE IF NOT EXISTS bulk_order_inquiries (
+  id BIGSERIAL PRIMARY KEY,
+  product_id BIGINT NOT NULL REFERENCES products(id),
+  customer_name VARCHAR(120) NOT NULL,
+  email VARCHAR(160) NOT NULL,
+  phone VARCHAR(30) NOT NULL,
+  company_name VARCHAR(160),
+  quantity INTEGER NOT NULL,
+  message TEXT,
+  status VARCHAR(30) NOT NULL DEFAULT 'NEW',
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
-create table if not exists instagram_auth (
-  id bigserial primary key,
-  instagram_user_id varchar(100) not null,
-  access_token text not null,
-  expires_at timestamp not null,
-  refreshed_at timestamp,
-  created_at timestamp not null default now(),
-  updated_at timestamp not null default now(),
-  is_active boolean not null default true
+CREATE TABLE IF NOT EXISTS instagram_auth (
+  id BIGSERIAL PRIMARY KEY,
+  instagram_user_id VARCHAR(100) NOT NULL,
+  access_token TEXT NOT NULL,
+  expires_at TIMESTAMP NOT NULL,
+  refreshed_at TIMESTAMP,
+  created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+  updated_at TIMESTAMP NOT NULL DEFAULT NOW(),
+  is_active BOOLEAN NOT NULL DEFAULT TRUE
 );
 
-create table if not exists instagram_media_cache (
-  id bigserial primary key,
-  cache_key varchar(100) not null unique,
-  payload_json text not null,
-  updated_at timestamp not null
+CREATE TABLE IF NOT EXISTS instagram_media_cache (
+  id BIGSERIAL PRIMARY KEY,
+  cache_key VARCHAR(100) NOT NULL UNIQUE,
+  payload_json TEXT NOT NULL,
+  updated_at TIMESTAMP NOT NULL
 );
 
 -- =========================================
 -- PASSWORD RESET TOKEN TABLE
 -- =========================================
 
-create table if not exists password_reset_tokens (
-  id bigserial primary key,
-  user_id bigint not null,
-  token_hash varchar(64) not null unique,
-  expires_at timestamp not null,
-  used_at timestamp null,
-  created_at timestamp not null default current_timestamp,
+CREATE TABLE IF NOT EXISTS password_reset_tokens (
+  id BIGSERIAL PRIMARY KEY,
+  user_id BIGINT NOT NULL,
+  token_hash VARCHAR(64) NOT NULL UNIQUE,
+  expires_at TIMESTAMP NOT NULL,
+  used_at TIMESTAMP NULL,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
-  constraint fk_password_reset_user
-    foreign key (user_id)
-    references users(id)
-    on delete cascade
+  CONSTRAINT fk_password_reset_user
+    FOREIGN KEY (user_id)
+    REFERENCES users(id)
+    ON DELETE CASCADE
 );
 
 -- =========================================
 -- MOBILE PASSWORD RESET OTP TABLE
 -- =========================================
 
-create table if not exists mobile_password_reset_otps (
-  id bigserial primary key,
-  user_id bigint not null,
-  phone varchar(20) not null,
-  otp_hash varchar(64) not null,
-  expires_at timestamp not null,
-  used_at timestamp null,
-  attempt_count integer not null default 0,
-  created_at timestamp not null default current_timestamp,
+CREATE TABLE IF NOT EXISTS mobile_password_reset_otps (
+  id BIGSERIAL PRIMARY KEY,
+  user_id BIGINT NOT NULL,
+  phone VARCHAR(20) NOT NULL,
+  otp_hash VARCHAR(64) NOT NULL,
+  expires_at TIMESTAMP NOT NULL,
+  used_at TIMESTAMP NULL,
+  attempt_count INTEGER NOT NULL DEFAULT 0,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
-  constraint fk_mobile_password_reset_user
-    foreign key (user_id)
-    references users(id)
-    on delete cascade
+  CONSTRAINT fk_mobile_password_reset_user
+    FOREIGN KEY (user_id)
+    REFERENCES users(id)
+    ON DELETE CASCADE
 );
 
 -- =========================================
 -- NEWSLETTER SUBSCRIBERS TABLE
 -- =========================================
 
-create table if not exists newsletter_subscribers (
-  id bigserial primary key,
-  email varchar(160) not null unique,
-  subscribed_at timestamp not null default current_timestamp
+CREATE TABLE IF NOT EXISTS newsletter_subscribers (
+  id BIGSERIAL PRIMARY KEY,
+  email VARCHAR(160) NOT NULL UNIQUE,
+  subscribed_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
+
+-- =========================================
+-- ADDITIONAL CATEGORY COLUMNS
+-- =========================================
+
+ALTER TABLE categories
+  ADD COLUMN IF NOT EXISTS image_url VARCHAR(500),
+  ADD COLUMN IF NOT EXISTS banner_image_url VARCHAR(500),
+  ADD COLUMN IF NOT EXISTS thin_banner_image_url VARCHAR(500);
+
+-- =========================================
+-- ADDITIONAL PRODUCT COLUMNS
+-- =========================================
+
+ALTER TABLE products
+  ADD COLUMN IF NOT EXISTS short_highlights TEXT,
+  ADD COLUMN IF NOT EXISTS specifications_json TEXT,
+  ADD COLUMN IF NOT EXISTS feature_highlights_json TEXT,
+  ADD COLUMN IF NOT EXISTS faq_json TEXT,
+  ADD COLUMN IF NOT EXISTS warranty_info TEXT,
+  ADD COLUMN IF NOT EXISTS box_contents_json TEXT,
+  ADD COLUMN IF NOT EXISTS compatibility TEXT,
+  ADD COLUMN IF NOT EXISTS demo_video_url VARCHAR(1000),
+  ADD COLUMN IF NOT EXISTS pdp_banners_json TEXT;
+
+-- =========================================
+-- WISHLIST TABLE
+-- =========================================
+
+CREATE TABLE IF NOT EXISTS wishlists (
+  id BIGSERIAL PRIMARY KEY,
+  user_id BIGINT NOT NULL,
+  product_id BIGINT NOT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+  CONSTRAINT fk_wishlist_user
+    FOREIGN KEY (user_id)
+    REFERENCES users(id)
+    ON DELETE CASCADE,
+
+  CONSTRAINT fk_wishlist_product
+    FOREIGN KEY (product_id)
+    REFERENCES products(id)
+    ON DELETE CASCADE,
+
+  CONSTRAINT uk_wishlist_user_product
+    UNIQUE (user_id, product_id)
+);
+
+-- =========================================
+-- CATEGORY MULTIPLE IMAGE TABLES
+-- =========================================
+
+CREATE TABLE IF NOT EXISTS category_images (
+  category_id BIGINT NOT NULL,
+  sort_order INTEGER NOT NULL,
+  image_url VARCHAR(500),
+
+  CONSTRAINT fk_category_images_category
+    FOREIGN KEY (category_id)
+    REFERENCES categories(id)
+    ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS category_banner_images (
+  category_id BIGINT NOT NULL,
+  sort_order INTEGER NOT NULL,
+  image_url VARCHAR(500),
+
+  CONSTRAINT fk_category_banner_images_category
+    FOREIGN KEY (category_id)
+    REFERENCES categories(id)
+    ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS category_thin_banner_images (
+  category_id BIGINT NOT NULL,
+  sort_order INTEGER NOT NULL,
+  image_url VARCHAR(500),
+
+  CONSTRAINT fk_category_thin_banner_images_category
+    FOREIGN KEY (category_id)
+    REFERENCES categories(id)
+    ON DELETE CASCADE
+);
+
+-- Copy existing single category images only when the same migrated row
+-- is not already present. This prevents duplicates when this file is rerun.
+
+INSERT INTO category_images (category_id, sort_order, image_url)
+SELECT c.id, 0, c.image_url
+FROM categories c
+WHERE c.image_url IS NOT NULL
+  AND c.image_url <> ''
+  AND NOT EXISTS (
+    SELECT 1
+    FROM category_images ci
+    WHERE ci.category_id = c.id
+      AND ci.sort_order = 0
+      AND ci.image_url = c.image_url
+  );
+
+INSERT INTO category_banner_images (category_id, sort_order, image_url)
+SELECT c.id, 0, c.banner_image_url
+FROM categories c
+WHERE c.banner_image_url IS NOT NULL
+  AND c.banner_image_url <> ''
+  AND NOT EXISTS (
+    SELECT 1
+    FROM category_banner_images cbi
+    WHERE cbi.category_id = c.id
+      AND cbi.sort_order = 0
+      AND cbi.image_url = c.banner_image_url
+  );
+
+INSERT INTO category_thin_banner_images (category_id, sort_order, image_url)
+SELECT c.id, 0, c.thin_banner_image_url
+FROM categories c
+WHERE c.thin_banner_image_url IS NOT NULL
+  AND c.thin_banner_image_url <> ''
+  AND NOT EXISTS (
+    SELECT 1
+    FROM category_thin_banner_images ctbi
+    WHERE ctbi.category_id = c.id
+      AND ctbi.sort_order = 0
+      AND ctbi.image_url = c.thin_banner_image_url
+  );
+
+-- =========================================
+-- PRODUCT DISPLAY ORDER
+-- =========================================
+-- The backfill runs only when display_order is first added.
+-- Existing display_order values are never overwritten.
+
+DO $$
+DECLARE
+  display_order_is_missing BOOLEAN;
+BEGIN
+  SELECT NOT EXISTS (
+    SELECT 1
+    FROM information_schema.columns
+    WHERE table_schema = current_schema()
+      AND table_name = 'products'
+      AND column_name = 'display_order'
+  )
+  INTO display_order_is_missing;
+
+  IF display_order_is_missing THEN
+    ALTER TABLE products
+      ADD COLUMN display_order INT NOT NULL DEFAULT 0;
+
+    WITH ordered_products AS (
+      SELECT
+        id,
+        ROW_NUMBER() OVER (ORDER BY id DESC) AS new_display_order
+      FROM products
+    )
+    UPDATE products p
+    SET display_order = ordered_products.new_display_order
+    FROM ordered_products
+    WHERE p.id = ordered_products.id;
+  END IF;
+END
+$$;
 
 -- =========================================
 -- INDEXES
 -- =========================================
 
-create index if not exists idx_brand_showcases_active_deleted_order
-  on brand_showcases (is_active, is_deleted, display_order, id);
+CREATE INDEX IF NOT EXISTS idx_brand_showcases_active_deleted_order
+  ON brand_showcases (is_active, is_deleted, display_order, id);
 
-create index if not exists idx_brand_showcase_items_showcase_order
-  on brand_showcase_items (brand_showcase_id, display_order, id);
+CREATE INDEX IF NOT EXISTS idx_brand_showcase_items_showcase_order
+  ON brand_showcase_items (brand_showcase_id, display_order, id);
 
-create index if not exists idx_hero_sections_active_deleted_sort
-  on hero_sections (is_active, is_deleted, sort_order);
+CREATE INDEX IF NOT EXISTS idx_hero_sections_active_deleted_sort
+  ON hero_sections (is_active, is_deleted, sort_order);
 
-create index if not exists idx_gift_set_cart_items_cart_id
-  on gift_set_cart_items (gift_set_cart_id);
+CREATE INDEX IF NOT EXISTS idx_gift_set_cart_items_cart_id
+  ON gift_set_cart_items (gift_set_cart_id);
 
-create index if not exists idx_gift_set_cart_items_product_id
-  on gift_set_cart_items (product_id);
+CREATE INDEX IF NOT EXISTS idx_gift_set_cart_items_product_id
+  ON gift_set_cart_items (product_id);
 
-create index if not exists idx_gift_set_cart_items_gift_box_id
-  on gift_set_cart_items (gift_box_id);
+CREATE INDEX IF NOT EXISTS idx_gift_set_cart_items_gift_box_id
+  ON gift_set_cart_items (gift_box_id);
 
-create index if not exists idx_gift_set_orders_user_id
-  on gift_set_orders (user_id);
+CREATE INDEX IF NOT EXISTS idx_gift_set_orders_user_id
+  ON gift_set_orders (user_id);
 
-create index if not exists idx_gift_set_order_items_order_id
-  on gift_set_order_items (gift_set_order_id);
+CREATE INDEX IF NOT EXISTS idx_gift_set_order_items_order_id
+  ON gift_set_order_items (gift_set_order_id);
 
-create index if not exists idx_bulk_order_inquiries_created_at
-  on bulk_order_inquiries (created_at desc);
+CREATE INDEX IF NOT EXISTS idx_bulk_order_inquiries_created_at
+  ON bulk_order_inquiries (created_at DESC);
 
-create index if not exists idx_bulk_order_inquiries_product_id
-  on bulk_order_inquiries (product_id);
+CREATE INDEX IF NOT EXISTS idx_bulk_order_inquiries_product_id
+  ON bulk_order_inquiries (product_id);
 
-create index if not exists idx_instagram_auth_active
-  on instagram_auth (is_active);
+CREATE INDEX IF NOT EXISTS idx_instagram_auth_active
+  ON instagram_auth (is_active);
 
-create index if not exists idx_password_reset_token_hash
-  on password_reset_tokens(token_hash);
+CREATE INDEX IF NOT EXISTS idx_password_reset_token_hash
+  ON password_reset_tokens(token_hash);
 
-create index if not exists idx_password_reset_user_id
-  on password_reset_tokens(user_id);
+CREATE INDEX IF NOT EXISTS idx_password_reset_user_id
+  ON password_reset_tokens(user_id);
 
-create index if not exists idx_password_reset_expires_at
-  on password_reset_tokens(expires_at);
+CREATE INDEX IF NOT EXISTS idx_password_reset_expires_at
+  ON password_reset_tokens(expires_at);
 
-create index if not exists idx_mobile_reset_phone
-  on mobile_password_reset_otps(phone);
+CREATE INDEX IF NOT EXISTS idx_mobile_reset_phone
+  ON mobile_password_reset_otps(phone);
 
-create index if not exists idx_mobile_reset_otp_hash
-  on mobile_password_reset_otps(otp_hash);
+CREATE INDEX IF NOT EXISTS idx_mobile_reset_otp_hash
+  ON mobile_password_reset_otps(otp_hash);
+
+CREATE INDEX IF NOT EXISTS idx_category_images_category_id
+  ON category_images(category_id);
+
+CREATE INDEX IF NOT EXISTS idx_category_banner_images_category_id
+  ON category_banner_images(category_id);
+
+CREATE INDEX IF NOT EXISTS idx_category_thin_banner_images_category_id
+  ON category_thin_banner_images(category_id);
+
+CREATE INDEX IF NOT EXISTS idx_products_display_order
+  ON products(display_order);
+

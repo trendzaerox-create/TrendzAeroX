@@ -1,4 +1,4 @@
-﻿
+
 # spring:
 #   application:
 #     name: mydev-ecommerce
@@ -128,6 +128,7 @@
 
 
 
+```yaml
 spring:
   application:
     name: mydev-ecommerce
@@ -161,7 +162,7 @@ spring:
 
     # Temporary: keep true only for the first startup after
     # deleting the old flyway_schema_history table.
-    baseline-on-migrate: false
+    baseline-on-migrate: true
     baseline-version: "2"
     baseline-description: "Combined schema and seed baseline"
 
@@ -232,7 +233,7 @@ instagram:
   graph-version: ${INSTAGRAM_GRAPH_VERSION:v25.0}
   app-secret: ${INSTAGRAM_APP_SECRET}
   refresh-threshold-days: ${INSTAGRAM_REFRESH_THRESHOLD_DAYS:15}
-  scheduled-refresh-cron: "${INSTAGRAM_REFRESH_CRON:0 0 3 * * *}"
+  scheduled-refresh-cron: "${INSTAGRAM_REFRESH_CRON:0 0 3 * * * *}"
   cache:
     refresh-limit: ${INSTAGRAM_CACHE_REFRESH_LIMIT:20}
   media-refresh-cron: "${INSTAGRAM_MEDIA_REFRESH_CRON:0 */20 * * * *}"
@@ -242,3 +243,4 @@ logging:
     root: INFO
     com.mydev.ecommerce.instagram: INFO
     org.springframework.web: INFO
+```
