@@ -1,250 +1,155 @@
-import Link from "next/link";
-import {
-  FiRotateCcw,
-  FiCheckCircle,
-  FiMail,
-  FiCreditCard,
-  FiClock,
-  FiXCircle,
-  FiTruck,
-  FiArrowRight,
-} from "react-icons/fi";
+// src/app/(shop)/refund-policy/page.js
 
 export const metadata = {
-  title: "Refund Policy | Trendz Firenze",
+  title: "Refund Policy | Trendz AeroX",
   description:
-    "Read the Trendz Firenze refund policy, including eligibility, refund process, refund method, timelines, non-refundable items, and shipping charge terms.",
+    "Read the Trendz AeroX refund policy, including refund eligibility, processing time, cancellations, and non-refundable charges.",
 };
 
-const sections = [
+const policySections = [
   {
-    icon: FiCheckCircle,
-    title: "Eligibility for Refund",
-    items: [
-      "Refund requests must be raised within 7 days of delivery",
-      "The product must be unused, unworn, and in original condition",
-      "All original packaging, tags, and accessories must be intact",
-      "Proof of purchase (Order ID) is required",
-    ],
+    number: "01",
+    title: "Refund Eligibility",
+    description:
+      "Refunds are processed only after the returned product passes our quality inspection and the return request is approved by Trendz AeroX.",
   },
   {
-    icon: FiMail,
-    title: "Refund Process",
-    items: [
-      "Email us at support@trendzfirenze.com",
-      "Include your Order ID, reason for refund, and clear images of the product",
-      "Our team will review your request within 24–48 hours",
-      "Once approved, the product must be returned to our provided address",
-    ],
-  },
-  {
-    icon: FiCreditCard,
+    number: "02",
     title: "Refund Method",
-    items: [
-      "Refunds will be processed to the original payment method",
-      "For Cash on Delivery (COD) orders, refunds will be issued via bank transfer or UPI",
-    ],
+    description:
+      "Once approved, the refund will be initiated to the original payment method used when placing the order.",
   },
   {
-    icon: FiClock,
-    title: "Refund Timeline",
-    items: [
-      "After product inspection, refunds will be processed within 5–7 business days",
-    ],
+    number: "03",
+    title: "Processing Time",
+    description:
+      "Refunds may take 5 to 7 business days after approval, depending on the payment gateway, bank, or card provider.",
   },
   {
-    icon: FiXCircle,
-    title: "Non-Refundable Items",
-    items: [
-      "Used, damaged, or altered products",
-      "Products returned without original packaging",
-      "Items purchased during clearance or final sale",
-    ],
+    number: "04",
+    title: "Order Cancellation",
+    description:
+      "Prepaid orders cancelled before dispatch will be refunded to the original payment method. Orders already shipped will be handled according to our Return & Exchange Policy.",
   },
-  {
-    icon: FiTruck,
-    title: "Shipping Charges",
-    items: [
-      "Shipping charges are non-refundable",
-      "Return shipping costs may be borne by the customer unless the product is defective or incorrect",
-    ],
-  },
-];
-
-const requestItems = [
-  "Order ID",
-  "Reason for refund",
-  "Clear images of the product",
 ];
 
 export default function RefundPolicyPage() {
   return (
-    <main className="bg-white text-[#111111]">
-      <section className="mx-auto max-w-[1200px] px-5 py-16 sm:px-8 sm:py-20 lg:px-12 lg:py-24">
-        <div className="grid gap-12 lg:grid-cols-[1.05fr_0.95fr] lg:items-start">
-          <div className="animate-[fadeUp_0.7s_ease-out]">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-[#7a7a7a]">
-              Refund Policy
+    <main className="min-h-screen bg-white text-black">
+      {/* Hero */}
+      <section className="border-b border-black/10">
+        <div className="mx-auto max-w-6xl px-6 pb-14 pt-24 sm:px-8 sm:pb-20 sm:pt-32 lg:px-10">
+          <div className="max-w-3xl">
+            <p className="mb-5 text-xs font-semibold uppercase tracking-[0.3em] text-neutral-500">
+              Trendz AeroX Policies
             </p>
 
-            <h1 className="mt-4 text-4xl font-semibold leading-[1.05] tracking-[-0.03em] sm:text-5xl lg:text-6xl">
-              Transparent and hassle-free refunds.
+            <h1 className="text-4xl font-medium tracking-tight sm:text-5xl lg:text-6xl">
+              Refund Policy
             </h1>
 
-            <div className="mt-8 max-w-2xl space-y-5 text-[15px] leading-8 text-[#555555] sm:text-[16px]">
-              <p>
-                At Trendz Firenze, we strive to ensure that you are completely
-                satisfied with your purchase. If you are not fully satisfied, we
-                offer a transparent and hassle-free refund process.
-              </p>
-
-              <p>
-                Please review the refund conditions and process carefully before
-                raising a request so our team can assist you smoothly.
-              </p>
-            </div>
-
-            <div className="mt-10 mb-14 flex flex-wrap gap-4 sm:mb-16">
-              <a
-                href="mailto:support@trendzfirenze.com"
-                className="inline-flex items-center justify-center rounded-full bg-[#111111] px-6 py-3 text-[14px] font-medium text-white transition hover:bg-[#222222]"
-              >
-                Request Refund
-                <FiArrowRight className="ml-2 text-[16px]" />
-              </a>
-
-              <Link
-                href="/contact"
-                className="inline-flex items-center justify-center rounded-full border border-[#d9d9d9] px-6 py-3 text-[14px] font-medium text-[#111111] transition hover:bg-[#f8f8f8]"
-              >
-                Contact Us
-              </Link>
-            </div>
-          </div>
-
-          <div className="mt-6 lg:mt-0 animate-[fadeIn_0.9s_ease-out] rounded-[24px] border border-[#ececec] bg-[#fafafa] p-6 sm:p-8">
-            <div className="flex items-center gap-3">
-              <div className="flex h-11 w-11 items-center justify-center rounded-full bg-[#111111] text-white">
-                <FiRotateCcw className="text-[18px]" />
-              </div>
-              <div>
-                <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-[#7a7a7a]">
-                  Refund Overview
-                </p>
-                <p className="mt-1 text-[18px] font-semibold text-[#111111]">
-                  Clear and reliable support
-                </p>
-              </div>
-            </div>
-
-            <div className="mt-6 space-y-4">
-              {sections.map((section, index) => {
-                const Icon = section.icon;
-
-                return (
-                  <div
-                    key={section.title}
-                    className="animate-[fadeUp_0.7s_ease-out] rounded-2xl border border-[#ededed] bg-white p-5"
-                    style={{ animationDelay: `${index * 100}ms` }}
-                  >
-                    <div className="flex items-start gap-4">
-                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#111111] text-white">
-                        <Icon className="text-[17px]" />
-                      </div>
-
-                      <div className="min-w-0">
-                        <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[#7a7a7a]">
-                          {section.title}
-                        </p>
-
-                        <ul className="mt-3 space-y-2">
-                          {section.items.map((item) => (
-                            <li
-                              key={item}
-                              className="flex items-start gap-2 text-[15px] leading-7 text-[#333333]"
-                            >
-                              <span className="mt-[10px] h-1.5 w-1.5 shrink-0 rounded-full bg-[#111111]" />
-                              <span>{item}</span>
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
+            <p className="mt-6 max-w-2xl text-base leading-8 text-neutral-600 sm:text-lg">
+              Clear information about refund eligibility, processing timelines,
+              payment methods, and order cancellations.
+            </p>
           </div>
         </div>
       </section>
 
-      <section className="border-t border-[#efefef] bg-[#fcfcfc]">
-        <div className="mx-auto max-w-[1200px] px-5 py-14 sm:px-8 sm:py-16 lg:px-12">
-          <div className="grid gap-8 lg:grid-cols-[0.9fr_1.1fr]">
-            <div className="animate-[fadeUp_0.7s_ease-out]">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-[#7a7a7a]">
-                How to Request
+      {/* Policy content */}
+      <section>
+        <div className="mx-auto grid max-w-6xl gap-12 px-6 py-14 sm:px-8 sm:py-20 lg:grid-cols-[0.65fr_1.35fr] lg:gap-20 lg:px-10">
+          {/* Left side */}
+          <aside>
+            <div className="lg:sticky lg:top-24">
+              <p className="text-sm font-medium">Important information</p>
+
+              <p className="mt-4 max-w-sm text-sm leading-7 text-neutral-500">
+                Refund approval is subject to product inspection and compliance
+                with the return conditions.
               </p>
-              <h2 className="mt-3 text-[28px] font-semibold tracking-[-0.02em] text-[#111111]">
-                Start your refund request by email.
-              </h2>
-              <p className="mt-4 max-w-xl text-[15px] leading-7 text-[#5a5a5a]">
-                Email us at{" "}
-                <a
-                  href="mailto:support@trendzfirenze.com"
-                  className="font-medium text-[#111111] underline underline-offset-4"
+
+              <div className="mt-8 inline-flex items-center gap-3 border border-black px-4 py-3">
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  className="h-5 w-5"
+                  aria-hidden="true"
                 >
-                  support@trendzfirenze.com
-                </a>{" "}
-                with the required details so our team can review your request.
-              </p>
-            </div>
+                  <path
+                    d="M12 3V21M7.5 7.5L12 3L16.5 7.5M7.5 16.5L12 21L16.5 16.5"
+                    stroke="currentColor"
+                    strokeWidth="1.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
 
-            <div className="animate-[fadeIn_0.9s_ease-out] rounded-[24px] border border-[#ececec] bg-white p-6 sm:p-8">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[#7a7a7a]">
-                Include these details
-              </p>
-
-              <div className="mt-5 grid gap-3">
-                {requestItems.map((item, index) => (
-                  <div
-                    key={item}
-                    className="animate-[fadeUp_0.7s_ease-out] flex items-center gap-3 rounded-2xl border border-[#ededed] bg-[#fafafa] px-4 py-4"
-                    style={{ animationDelay: `${index * 100}ms` }}
-                  >
-                    <span className="flex h-7 w-7 items-center justify-center rounded-full bg-[#111111] text-[12px] font-medium text-white">
-                      {index + 1}
-                    </span>
-                    <p className="text-[15px] text-[#222222]">{item}</p>
-                  </div>
-                ))}
+                <span className="text-xs font-semibold uppercase tracking-[0.16em]">
+                  5–7 business days
+                </span>
               </div>
             </div>
+          </aside>
+
+          {/* Right side */}
+          <div>
+            <div className="divide-y divide-black/10 border-y border-black/10">
+              {policySections.map((section) => (
+                <article
+                  key={section.number}
+                  className="grid gap-4 py-8 sm:grid-cols-[60px_1fr] sm:gap-6"
+                >
+                  <span className="text-xs font-semibold tracking-[0.15em] text-neutral-400">
+                    {section.number}
+                  </span>
+
+                  <div>
+                    <h2 className="text-xl font-medium tracking-tight">
+                      {section.title}
+                    </h2>
+
+                    <p className="mt-3 text-sm leading-7 text-neutral-600 sm:text-base">
+                      {section.description}
+                    </p>
+                  </div>
+                </article>
+              ))}
+            </div>
+
+            {/* Charges */}
+            <div className="mt-10 bg-neutral-950 p-7 text-white sm:p-9">
+              <p className="text-xs font-semibold uppercase tracking-[0.22em] text-neutral-400">
+                Non-refundable charges
+              </p>
+
+              <p className="mt-4 text-sm leading-7 text-neutral-300 sm:text-base">
+                Shipping charges, COD charges, convenience fees, and handling
+                charges may be non-refundable unless the return is caused by an
+                error from Trendz AeroX.
+              </p>
+            </div>
+
+            {/* Rejection conditions */}
+            <div className="mt-10 rounded-sm border border-black/10 bg-neutral-50 p-7 sm:p-9">
+              <h2 className="text-xl font-medium tracking-tight">
+                Refund claim rejection
+              </h2>
+
+              <p className="mt-4 text-sm leading-7 text-neutral-600 sm:text-base">
+                Trendz AeroX reserves the right to reject a refund claim when
+                the returned product is used, damaged, altered, missing
+                accessories, or does not match its original order condition.
+              </p>
+            </div>
+
+            <p className="mt-8 text-xs leading-6 text-neutral-400">
+              Refund timelines may vary depending on your bank, card issuer, or
+              payment service provider.
+            </p>
           </div>
         </div>
       </section>
-
-      <style>{`
-        @keyframes fadeUp {
-          0% {
-            opacity: 0;
-            transform: translateY(24px);
-          }
-          100% {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-
-        @keyframes fadeIn {
-          0% {
-            opacity: 0;
-          }
-          100% {
-            opacity: 1;
-          }
-        }
-      `}</style>
     </main>
   );
 }
