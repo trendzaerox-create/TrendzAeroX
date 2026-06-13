@@ -125,9 +125,6 @@
 
 
 
-
-
-
 spring:
   application:
     name: mydev-ecommerce
@@ -158,12 +155,10 @@ spring:
     locations: classpath:db/migration
     schemas: public
     default-schema: public
-
-    # Temporary: keep true only for the first startup after
-    # deleting the old flyway_schema_history table.
     baseline-on-migrate: false
     baseline-version: "2"
     baseline-description: "Combined schema and seed baseline"
+    ignore-migration-patterns: "*:missing"
 
   servlet:
     multipart:
@@ -197,7 +192,11 @@ app:
       api-key: ${BREVO_API_KEY}
 
   frontend:
+    base-url: ${FRONTEND_URL:http://localhost:3000}
     reset-password-url: ${FRONTEND_RESET_PASSWORD_URL:http://localhost:3000/reset-password}
+
+  shipment:
+    delhivery-tracking-url: ${DELHIVERY_TRACKING_URL:https://www.delhivery.com/tracking}
 
   password-reset:
     expiry-minutes: ${PASSWORD_RESET_EXPIRY_MINUTES:30}
