@@ -231,7 +231,7 @@ public class InstagramMediaService {
                     if (altText == null || altText.isBlank()) {
                         altText = (caption != null && !caption.isBlank())
                                 ? caption
-                                : "Trendz Firenze Instagram post";
+                                : "Trendz AeroX Instagram post";
                     }
 
                     boolean isVideo = "VIDEO".equals(mediaType);

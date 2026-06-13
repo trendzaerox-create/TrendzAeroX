@@ -21,7 +21,7 @@ public class ShipmentEmailService {
     private final EmailService emailService;
 
     @Value(
-            "${app.mail.from-name:Trendz Firenze}"
+            "${app.mail.from-name:Trendz AeroX}"
     )
     private String brandName;
 

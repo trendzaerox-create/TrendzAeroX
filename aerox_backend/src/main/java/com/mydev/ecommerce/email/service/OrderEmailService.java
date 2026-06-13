@@ -62,7 +62,7 @@ public class OrderEmailService {
 
         return """
             <div style="font-family:Arial,sans-serif;max-width:700px;margin:0 auto;padding:24px;background:#ffffff;color:#111827;">
-              <h2 style="margin-bottom:8px;">Trendz Firenze</h2>
+              <h2 style="margin-bottom:8px;">Trendz AeroX</h2>
               <p style="font-size:16px;color:#111827;">%s</p>
               <p><strong>Order Number:</strong> %s</p>
               <p><strong>Payment Method:</strong> %s</p>

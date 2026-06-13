@@ -26,7 +26,7 @@ public class NewsletterController {
 
         return ResponseEntity.ok(
                 NewsletterMessageResponse.builder()
-                        .message("Thank you for subscribing to Trendz Firenze.")
+                        .message("Thank you for subscribing to Trendz AeroX.")
                         .build()
         );
     }

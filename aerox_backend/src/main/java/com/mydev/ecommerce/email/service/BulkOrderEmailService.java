@@ -44,7 +44,7 @@ public class BulkOrderEmailService {
     }
 
     public void sendCustomerAcknowledgement(BulkInquiryEmailPayload payload) {
-        String subject = "We Received Your Bulk Inquiry - Trendz Firenze";
+        String subject = "We Received Your Bulk Inquiry - Trendz AeroX";
 
         String html = """
             <div style="font-family:Arial,sans-serif;max-width:700px;margin:0 auto;padding:24px;background:#ffffff;color:#111827;">
@@ -53,7 +53,7 @@ public class BulkOrderEmailService {
               <p>We have received your bulk order inquiry for <strong>%s</strong>.</p>
               <p><strong>Requested Quantity:</strong> %s</p>
               <p>Our team will contact you soon.</p>
-              <p>Regards,<br/>Trendz Firenze</p>
+              <p>Regards,<br/>Trendz AeroX</p>
             </div>
         """.formatted(
                 safe(payload.getCustomerName()),

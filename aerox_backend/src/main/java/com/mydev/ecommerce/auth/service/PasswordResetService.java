@@ -69,7 +69,7 @@ public class PasswordResetService {
 
             emailService.sendHtmlEmail(
                     cleanEmail,
-                    "Reset your Trendz Firenze password",
+                    "Reset your Trendz AeroX password",
                     html
             );
 
@@ -230,7 +230,7 @@ private String maskPhone(String phone) {
                     </p>
 
                     <p style="font-size:15px;color:#374151;line-height:1.6;">
-                      We received a request to reset your Trendz Firenze account password.
+                      We received a request to reset your Trendz AeroX account password.
                       Click the button below to create a new password.
                     </p>
 
