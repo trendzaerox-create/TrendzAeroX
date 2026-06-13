@@ -18,9 +18,6 @@ export default function ProductCard({ product }) {
   const firstImage = product.images?.[0];
   const secondImage = product.images?.[1];
 
-  // IMPORTANT:
-  // /api/products now returns reviews: []
-  // So use averageRating and reviewCount directly from backend
   const reviewCount = Number(product.reviewCount || 0);
   const avgRating = Number(product.averageRating || 0);
 
@@ -124,12 +121,12 @@ export default function ProductCard({ product }) {
             )}
           </div>
 
-          <div className="mt-1.5 hidden items-center gap-1.5 sm:flex">
-            <span className="flex h-4.5 w-4.5 shrink-0 items-center justify-center rounded-full bg-[#c69b2d] text-[9px] font-bold text-white">
+          <div className="mt-1.5 flex items-center gap-1.5">
+            <span className="flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-[#c69b2d] text-[8px] font-bold text-white sm:h-4.5 sm:w-4.5 sm:text-[9px]">
               %
             </span>
 
-            <span className="line-clamp-1 text-[17px] font-semibold text-green-700">
+            <span className="line-clamp-1 text-[12px] font-semibold text-green-700 sm:text-[17px]">
               Offer Price ₹{offerPrice.toLocaleString("en-IN")}
             </span>
           </div>
