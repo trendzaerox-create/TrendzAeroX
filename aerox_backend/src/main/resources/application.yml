@@ -1,6 +1,4 @@
-﻿
-
-spring:
+﻿spring:
   application:
     name: mydev-ecommerce
 
@@ -65,6 +63,13 @@ app:
     admin-email: ${MAIL_ADMIN_EMAIL}
     brevo:
       api-key: ${BREVO_API_KEY}
+
+  review-email:
+    delay-days: ${REVIEW_EMAIL_DELAY_DAYS:2}
+    batch-size: ${REVIEW_EMAIL_BATCH_SIZE:20}
+    max-attempts: ${REVIEW_EMAIL_MAX_ATTEMPTS:5}
+    scheduler-fixed-delay-ms: ${REVIEW_EMAIL_SCHEDULER_FIXED_DELAY_MS:900000}
+    initial-delay-ms: ${REVIEW_EMAIL_INITIAL_DELAY_MS:60000}
 
   frontend:
     base-url: ${FRONTEND_URL:http://localhost:3000}
