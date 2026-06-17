@@ -9,7 +9,7 @@ import ProductCard from "@/components/ProductCard";
 import api from "@/lib/apiClient";
 
 const END_STATIC_BANNER_URL =
-  "https://t4.ftcdn.net/jpg/01/99/07/97/360_F_199079722_wxjZlTjvzMx9KF2kXReaKtePZwJXjfRW.jpg";
+  "/images/banners/Category/CategoryBanner-20.png";
 
 const PRODUCT_PAGE_SIZE = 50;
 
