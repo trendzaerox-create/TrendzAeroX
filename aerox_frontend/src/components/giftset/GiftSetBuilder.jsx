@@ -1049,9 +1049,12 @@ export default function GiftSetBuilder({ products = [] }) {
                         </div>
 
                         <div className="flex min-w-0 flex-1 flex-col px-4 pb-4 pt-3">
-                          <h3 className="min-h-[58px] whitespace-normal break-words text-[14px] font-semibold uppercase leading-[1.28] tracking-[0.03em] text-[#111]">
-                            {product.title}
-                          </h3>
+                         <h3
+  title={product.title}
+  className="min-w-0 truncate text-[14px] font-semibold uppercase leading-[1.28] tracking-[0.03em] text-[#111]"
+>
+  {product.title}
+</h3>
 
                           <div className="mt-auto flex items-center justify-between gap-3 pt-3">
                             <p className="shrink-0 text-lg font-semibold tracking-tight text-[#111]">
@@ -1141,10 +1144,12 @@ export default function GiftSetBuilder({ products = [] }) {
                       <p className="text-[11px] uppercase tracking-[0.24em] text-[#8a8a8a]">
                         Selected Product
                       </p>
-
-                      <h3 className="mt-2 min-h-[68px] whitespace-normal break-words text-[17px] font-semibold uppercase leading-[1.35] tracking-[0.03em] text-[#111]">
-                        {activeProduct.title}
-                      </h3>
+<h3
+  title={activeProduct.title}
+  className="mt-2 min-w-0 truncate text-[17px] font-semibold uppercase leading-[1.35] tracking-[0.03em] text-[#111]"
+>
+  {activeProduct.title}
+</h3>
 
                       <div className="mt-4 flex items-center justify-between gap-3">
                         <p className="shrink-0 text-xl font-semibold tracking-tight text-[#111]">
