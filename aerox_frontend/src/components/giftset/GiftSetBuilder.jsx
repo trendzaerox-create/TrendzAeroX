@@ -650,6 +650,9 @@ import { fetchActiveGiftBoxes } from "@/features/giftBoxes/giftBoxSlice";
 import SelectedGiftSetItems from "./SelectedGiftSetItems";
 import GiftSetSummary from "./GiftSetSummary";
 import getImageUrl from "@/lib/getImageUrl";
+import StarRating from "@/components/StarRating";
+
+
 
 function getProductImage(product) {
   const rawImage =
@@ -1017,81 +1020,134 @@ export default function GiftSetBuilder({ products = [] }) {
               ) : (
                 <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4">
                   {products.map((product) => {
-                    const selected = selectedIds.has(product.id);
-                    const disabled = !selected && selectedItems.length >= 5;
-                    const isActive = activeProduct?.id === product.id;
+  const selected = selectedIds.has(product.id);
+  const disabled = !selected && selectedItems.length >= 5;
+  const isActive = activeProduct?.id === product.id;
 
-                    return (
-                      <div
-                        key={product.id}
-                        className={`group flex h-full flex-col overflow-hidden rounded-[26px] border bg-[linear-gradient(180deg,#ffffff_0%,#fcfcfc_100%)] shadow-[0_12px_30px_rgba(0,0,0,0.04)] transition duration-300 ${
-                          isActive
-                            ? "border-black shadow-[0_18px_42px_rgba(0,0,0,0.09)]"
-                            : "border-[#ececec] hover:-translate-y-[3px] hover:shadow-[0_18px_42px_rgba(0,0,0,0.07)]"
-                        }`}
-                      >
-                        <div className="relative shrink-0 overflow-hidden border-b border-[#f1f1f1] bg-[linear-gradient(180deg,#ffffff_0%,#f5f5f5_100%)]">
-                          <div className="absolute left-4 top-4 z-10 inline-flex rounded-full border border-white/80 bg-white/90 px-3 py-1.5 text-[11px] font-medium uppercase tracking-[0.18em] text-[#555] shadow-sm backdrop-blur">
-                            {selected
-                              ? "Added"
-                              : isActive
-                              ? "Selected"
-                              : "Gift Pick"}
-                          </div>
+  const firstImage = product.images?.[0];
+  const secondImage = product.images?.[1];
 
-                          <div className="aspect-[1/1] overflow-hidden">
-                            <img
-                              src={getProductImage(product)}
-                              alt={product.title}
-                              className="h-full w-full object-contain p-4 transition duration-500 group-hover:scale-[1.03]"
-                            />
-                          </div>
-                        </div>
+  const reviewCount = Number(
+    product.reviewCount ?? product.reviewsCount ?? product.totalReviews ?? 0
+  );
 
-                        <div className="flex min-w-0 flex-1 flex-col px-4 pb-4 pt-3">
-                         <h3
-  title={product.title}
-  className="min-w-0 truncate text-[14px] font-semibold uppercase leading-[1.28] tracking-[0.03em] text-[#111]"
->
-  {product.title}
-</h3>
+  const avgRating = Number(
+    product.averageRating ?? product.avgRating ?? product.rating ?? 0
+  );
 
-                          <div className="mt-auto flex items-center justify-between gap-3 pt-3">
-                            <p className="shrink-0 text-lg font-semibold tracking-tight text-[#111]">
-                              ₹{product.priceInr}
-                            </p>
+  const sellingPrice = Number(product.priceInr || 0);
+  const mrp = Number(product.mrpInr || 0);
 
-                            <span className="shrink-0 rounded-full border border-[#ececec] px-3 py-1 text-[11px] uppercase tracking-[0.18em] text-[#666]">
-                              Premium
-                            </span>
-                          </div>
+  const discountPercent =
+    mrp > 0 && sellingPrice > 0 && mrp > sellingPrice
+      ? Math.round(((mrp - sellingPrice) / mrp) * 100)
+      : 0;
 
-                          <div className="mt-4">
-                            <button
-                              type="button"
-                              onClick={() => handlePickProduct(product)}
-                              disabled={
-                                selected || disabled || giftBoxLoading || loading
-                              }
-                              className={`inline-flex w-full items-center justify-center rounded-full border px-4 py-3 text-sm font-medium transition duration-300 ${
-                                selected
-                                  ? "cursor-not-allowed border-[#dddddd] bg-[#f4f4f4] text-[#9a9a9a]"
-                                  : isActive
-                                  ? "border-black bg-black text-white shadow-[0_12px_30px_rgba(0,0,0,0.14)]"
-                                  : "border-black bg-white text-black hover:bg-black hover:text-white"
-                              } disabled:cursor-not-allowed disabled:opacity-60`}
-                            >
-                              {selected
-                                ? "Already Added"
-                                : isActive
-                                ? "Selected"
-                                : "Add to Your Gift Set"}
-                            </button>
-                          </div>
-                        </div>
-                      </div>
-                    );
-                  })}
+  const offerPrice = sellingPrice;
+
+  return (
+    <div
+      key={product.id}
+      className={`group flex h-full flex-col overflow-hidden rounded-[10px] border bg-white shadow-[0_2px_8px_rgba(0,0,0,0.10)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_10px_24px_rgba(0,0,0,0.16)] sm:rounded-[14px] ${
+        isActive ? "border-black" : "border-neutral-200"
+      }`}
+    >
+      {/* Product Image */}
+      <div className="relative w-full overflow-hidden rounded-t-[10px] bg-white sm:rounded-t-[14px]">
+        <div className="relative aspect-square w-full">
+          <div className="absolute left-1.5 top-1.5 z-20 rounded-full bg-white/95 px-2.5 py-1 text-[9px] font-bold uppercase tracking-[0.12em] text-black shadow-[0_3px_10px_rgba(0,0,0,0.16)] sm:left-2 sm:top-2 sm:text-[10px]">
+            {selected ? "Added" : isActive ? "Selected" : "Gift Pick"}
+          </div>
+
+          {firstImage ? (
+            <div className="relative h-full w-full overflow-hidden">
+              <img
+                src={getImageUrl(firstImage)}
+                alt={product.title || "Product image"}
+                className="absolute inset-0 h-full w-full object-cover transition-all duration-500 group-hover:scale-105 group-hover:opacity-0"
+              />
+
+              <img
+                src={getImageUrl(secondImage || firstImage)}
+                alt={`${product.title || "Product"} second view`}
+                className="absolute inset-0 h-full w-full object-cover opacity-0 transition-all duration-500 group-hover:scale-105 group-hover:opacity-100"
+              />
+            </div>
+          ) : (
+            <div className="flex h-full w-full items-center justify-center text-xs font-medium text-neutral-500">
+              No Image
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Product Details */}
+      <div className="flex min-w-0 flex-1 flex-col px-2 pb-2 pt-1 sm:px-2.5 sm:pb-2.5 sm:pt-1.5">
+        <div className="flex items-center gap-1">
+          <StarRating value={avgRating} size="11px" />
+
+          <span className="text-[10px] font-medium text-neutral-600">
+            ({reviewCount})
+          </span>
+        </div>
+
+        <h3
+          title={product.title}
+          className="mt-1 truncate text-[12.5px] font-bold uppercase leading-4 text-black sm:text-[15px] sm:leading-5"
+        >
+          {product.title}
+        </h3>
+
+        <div className="mt-1 flex flex-wrap items-center gap-1 text-[11.5px] leading-none sm:text-[13px]">
+          {mrp > 0 && mrp > sellingPrice && (
+            <span className="font-medium text-neutral-500 line-through">
+              ₹{mrp.toLocaleString("en-IN")}
+            </span>
+          )}
+
+          <span className="font-bold text-black">
+            ₹{sellingPrice.toLocaleString("en-IN")}
+          </span>
+
+          {discountPercent > 0 && (
+            <span className="font-bold text-green-700">
+              {discountPercent}% OFF
+            </span>
+          )}
+        </div>
+
+        <div className="mt-1.5 flex items-center gap-1.5">
+          <span className="flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-full bg-[#c69b2d] text-[8px] font-bold text-white sm:text-[9px]">
+            %
+          </span>
+
+          <span className="truncate text-[12px] font-semibold text-green-700 sm:text-[17px]">
+            Offer Price ₹{offerPrice.toLocaleString("en-IN")}
+          </span>
+        </div>
+
+        <button
+          type="button"
+          onClick={() => handlePickProduct(product)}
+          disabled={selected || disabled || giftBoxLoading || loading}
+          className={`mt-3 inline-flex w-full items-center justify-center rounded-full border px-3 py-2.5 text-[12px] font-bold transition duration-300 sm:px-4 sm:py-3 sm:text-sm ${
+            selected
+              ? "cursor-not-allowed border-[#dddddd] bg-[#f4f4f4] text-[#9a9a9a]"
+              : isActive
+              ? "border-black bg-black text-white shadow-[0_12px_30px_rgba(0,0,0,0.14)]"
+              : "border-black bg-white text-black hover:bg-black hover:text-white"
+          } disabled:cursor-not-allowed disabled:opacity-60`}
+        >
+          {selected
+            ? "Already Added"
+            : isActive
+            ? "Selected"
+            : "Add to Gift Set"}
+        </button>
+      </div>
+    </div>
+  );
+})}
                 </div>
               )}
             </div>
