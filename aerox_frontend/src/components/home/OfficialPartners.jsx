@@ -192,7 +192,7 @@ const partners = [
   {
     id: 1,
     image:
-      "https://static.vecteezy.com/system/resources/previews/019/766/240/non_2x/amazon-logo-amazon-icon-transparent-free-png.png",
+      "images/logo/amazon.png",
     className: "amazonLogo",
   },
   {
