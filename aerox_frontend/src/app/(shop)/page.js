@@ -22,6 +22,8 @@ import TrustSection from "@/components/home/TrustSection";
 import TestimonialSection from "@/components/home/TestimonialSection";
 import InstagramCarouselSection from "@/components/home/InstagramCarouselSection";
 import NewsletterSection from "@/components/home/NewsletterSection";
+import OfficialPartners from "@/components/home/OfficialPartners";
+
 
 import HeroSectionCustom from "@/components/home/HeroSectionCustom";
 
@@ -97,6 +99,7 @@ export default function HomePage() {
       <HeroSectionCustom />
       <TestimonialSection />
       <InstagramCarouselSection />
+      <OfficialPartners />
       {/* <NewsletterSection /> */}
     </main>
   );

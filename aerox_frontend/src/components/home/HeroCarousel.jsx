@@ -143,7 +143,7 @@ export default function HeroCarousel() {
   return (
     <section className="w-full bg-gradient-to-b from-black via-[#6b6b6b] to-white px-2 py-0 sm:px-5 lg:px-7">
       <div className="w-full max-w-none">
-        <div className="relative w-full overflow-hidden rounded-[18px] bg-black shadow-2xl aspect-[4/5] md:aspect-[16/5]">
+        <div className="relative w-full overflow-hidden rounded-[18px] bg-black shadow-2xl aspect-[4/5] md:aspect-[16/6] lg:aspect-[16/6.5]">
           {slides.map((slide, index) => {
             const isActive = activeIndex === index;
 
