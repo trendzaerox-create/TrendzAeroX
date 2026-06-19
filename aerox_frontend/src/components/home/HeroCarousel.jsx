@@ -11,12 +11,12 @@ const slides = [
   },
   {
     id: 2,
-    image: "/images/banners/Home/home-hero-banner-1.png",
+    image: "/images/banners/Home/home-hero-banner-2.png",
     alt: "Luxury electronics banner",
   },
   {
     id: 3,
-    image: "/images/banners/Home/home-hero-banner-1.png",
+    image: "/images/banners/Home/home-hero-banner-3.png",
     alt: "Trending electronics banner",
   },
 ];
