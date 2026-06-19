@@ -1,43 +1,23 @@
 
-
 // "use client";
 
 // import { useEffect, useState } from "react";
-// import Link from "next/link";
 
 // const slides = [
 //   {
 //     id: 1,
-//     image: "/images/banners/Home/HomeHeroBanner-1.png",
+//     image: "/images/banners/Home/home-hero-banner-1.png",
 //     alt: "Signature premium bags banner",
-//     eyebrow: "Trendz AeroX",
-//     title: "India's first open earbuds. Now upgraded.",
-//     offer: "Launching on 25th May, 12 PM",
-//     price: "Get ₹1,499 off on launch",
-//     buttonText: "Pre-book Now",
-//     buttonLink: "/products",
 //   },
 //   {
 //     id: 2,
-//     image: "/images/banners/Home/HomeHeroBanner-2.png",
+//     image: "/images/banners/Home/home-hero-banner-1.png",
 //     alt: "Luxury electronics banner",
-//     eyebrow: "New Arrival",
-//     title: "Smart sound. Premium everyday style.",
-//     offer: "Designed for comfort and performance",
-//     price: "Shop latest collection",
-//     buttonText: "Explore Now",
-//     buttonLink: "/categories",
 //   },
 //   {
 //     id: 3,
-//     image: "/images/banners/Home/HomeHeroBanner-3.png",
+//     image: "/images/banners/Home/home-hero-banner-1.png",
 //     alt: "Trending electronics banner",
-//     eyebrow: "Trending Now",
-//     title: "Upgrade your tech lifestyle.",
-//     offer: "Premium gadgets for daily use",
-//     price: "Limited launch offers",
-//     buttonText: "View Products",
-//     buttonLink: "/products",
 //   },
 // ];
 
@@ -77,45 +57,6 @@
 //                     isActive ? "scale-105" : "scale-100"
 //                   }`}
 //                 />
-
-//                 <div className="absolute inset-0 bg-black/25" />
-//                 <div className="absolute inset-0 bg-gradient-to-r from-black via-black/75 to-transparent" />
-//                 <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/20" />
-
-//                 <div className="absolute inset-0 flex items-center px-3 sm:px-4 md:px-7 lg:px-9">
-//                   <div
-//                     className={`max-w-[460px] text-left text-white transition-all duration-1000 ${
-//                       isActive
-//                         ? "translate-y-0 opacity-100"
-//                         : "translate-y-6 opacity-0"
-//                     }`}
-//                   >
-//                     <p className="mb-2 text-[15px] font-medium tracking-wide text-white/95 sm:text-[18px]">
-//                       {slide.eyebrow}
-//                     </p>
-
-//                     <h2 className="max-w-[470px] text-[30px] font-bold leading-[1.13] tracking-[-0.02em] text-white sm:text-[38px] md:text-[44px]">
-//                       {slide.title}
-//                     </h2>
-
-//                     <p className="mt-3 text-[15px] font-semibold tracking-wide text-white sm:text-[18px]">
-//                       {slide.offer}
-//                     </p>
-
-//                     <p className="mt-1 text-[15px] font-semibold tracking-wide text-white sm:text-[18px]">
-//                       {slide.price}
-//                     </p>
-
-//                     <div className="mt-4">
-//                       <Link
-//                         href={slide.buttonLink}
-//                         className="inline-flex h-[28px] min-w-[155px] items-center justify-center rounded-full bg-[#6f6f6f] px-6 text-[13px] font-semibold text-white transition duration-300 hover:bg-white hover:text-black"
-//                       >
-//                         {slide.buttonText}
-//                       </Link>
-//                     </div>
-//                   </div>
-//                 </div>
 //               </div>
 //             );
 //           })}
@@ -162,17 +103,6 @@
 
 
 
-
-
-
-
-
-
-
-
-
-
-
 "use client";
 
 import { useEffect, useState } from "react";
@@ -180,17 +110,17 @@ import { useEffect, useState } from "react";
 const slides = [
   {
     id: 1,
-    image: "/images/banners/Home/HomeHeroBanner-1.png",
+    image: "/images/banners/home/home-hero-banner-1.png",
     alt: "Signature premium bags banner",
   },
   {
     id: 2,
-    image: "/images/banners/Home/HomeHeroBanner-2.png",
+    image: "/images/banners/home/home-hero-banner-2.png",
     alt: "Luxury electronics banner",
   },
   {
     id: 3,
-    image: "/images/banners/Home/HomeHeroBanner-3.png",
+    image: "/images/banners/home/home-hero-banner-3.png",
     alt: "Trending electronics banner",
   },
 ];
@@ -227,8 +157,9 @@ export default function HeroCarousel() {
                 <img
                   src={slide.image}
                   alt={slide.alt}
-                  className={`h-full w-full object-cover object-center transition-transform duration-[7000ms] ${
-                    isActive ? "scale-105" : "scale-100"
+                  loading={index === 0 ? "eager" : "lazy"}
+                  className={`h-full w-full object-contain object-center transition-opacity duration-[7000ms] ${
+                    isActive ? "opacity-100" : "opacity-0"
                   }`}
                 />
               </div>
