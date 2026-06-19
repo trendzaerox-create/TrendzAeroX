@@ -191,14 +191,12 @@
 const partners = [
   {
     id: 1,
-    name: "Amazon",
     image:
       "https://static.vecteezy.com/system/resources/previews/019/766/240/non_2x/amazon-logo-amazon-icon-transparent-free-png.png",
     className: "amazonLogo",
   },
   {
     id: 2,
-    name: "Flipkart",
     image:
       "https://upload.wikimedia.org/wikipedia/commons/e/e5/Flipkart_logo_%282026%29.svg",
     className: "flipkartLogo",
