@@ -27,8 +27,8 @@ const customerServiceLinks = [
 const trendzWorldLinks = [
   { label: "Corporate Order", href: "/bulk-order" },
   { label: "About Us", href: "/about" },
-  { label: "Blog", href: "/blog" },
-  { label: "Our Stores", href: "/stores" },
+  { label: "Blog", href: "/blogs" },
+  { label: "Our Stores", href: "/bestsellers" },
 ];
 
 const policyLinks = [
