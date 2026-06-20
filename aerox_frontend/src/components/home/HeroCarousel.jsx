@@ -98,8 +98,6 @@
 
 
 
-
-
 "use client";
 
 import { useEffect, useState } from "react";
@@ -122,6 +120,24 @@ const slides = [
     desktopImage: "/images/banners/Home/home-hero-banner-3-desktop.png",
     mobileImage: "/images/banners/Home/home-hero-banner-3-mobile.png",
     alt: "Trending electronics banner",
+  },
+  {
+    id: 4,
+    desktopImage: "/images/banners/Home/home-hero-banner-4-desktop.png",
+    mobileImage: "/images/banners/Home/home-hero-banner-4-mobile.png",
+    alt: "Premium smartwatch banner",
+  },
+  {
+    id: 5,
+    desktopImage: "/images/banners/Home/home-hero-banner-5-desktop.png",
+    mobileImage: "/images/banners/Home/home-hero-banner-5-mobile.png",
+    alt: "Premium earbuds banner",
+  },
+  {
+    id: 6,
+    desktopImage: "/images/banners/Home/home-hero-banner-6-desktop.png",
+    mobileImage: "/images/banners/Home/home-hero-banner-6-mobile.png",
+    alt: "Trendz AeroX offer banner",
   },
 ];
 
@@ -157,13 +173,11 @@ export default function HeroCarousel() {
                 }`}
               >
                 <picture>
-                  {/* Desktop / Tablet landscape image: 1920 x 600 */}
                   <source
                     media="(min-width: 768px)"
                     srcSet={slide.desktopImage}
                   />
 
-                  {/* Mobile image: 1080 x 1350 */}
                   <img
                     src={slide.mobileImage}
                     alt={slide.alt}
@@ -185,10 +199,10 @@ export default function HeroCarousel() {
                 type="button"
                 onClick={() => goToSlide(index)}
                 aria-label={`Go to slide ${index + 1}`}
-                className={`h-[9px] w-[9px] rounded-full transition-all duration-300 ${
+                className={`h-[9px] rounded-full transition-all duration-300 ${
                   activeIndex === index
                     ? "w-[22px] bg-black"
-                    : "bg-white/75 hover:bg-white"
+                    : "w-[9px] bg-white/75 hover:bg-white"
                 }`}
               />
             ))}
