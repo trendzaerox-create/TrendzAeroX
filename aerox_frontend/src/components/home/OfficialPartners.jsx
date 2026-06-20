@@ -198,7 +198,7 @@ const partners = [
   {
     id: 2,
     image:
-      "https://upload.wikimedia.org/wikipedia/commons/e/e5/Flipkart_logo_%282026%29.svg",
+      "images/logo/flipkart.png",
     className: "flipkartLogo",
   },
 ];
