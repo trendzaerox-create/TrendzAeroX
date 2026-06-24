@@ -1,4 +1,6 @@
 
+
+
 package com.mydev.ecommerce.product.model;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
@@ -30,11 +32,21 @@ public class Product {
     @Column(columnDefinition = "text")
     private String description;
 
+    // Final selling price
     @Column(name = "price_inr", nullable = false)
     private Integer priceInr;
 
-    @Column(name = "mrp_inr")
+    // Maximum Retail Price
+    @Column(name = "mrp_inr", nullable = false)
     private Integer mrpInr;
+
+    // Discounted price, not discount amount
+    // Example:
+    // mrpInr      = 3999
+    // discountInr = 1799
+    // priceInr    = 1399
+    @Column(name = "discount_inr", nullable = false)
+    private Integer discountInr = 0;
 
     @Column(nullable = false)
     private Integer stock = 0;
@@ -95,9 +107,14 @@ public class Product {
 
     @Transient
     public Integer getDiscountPercent() {
-        if (mrpInr == null || mrpInr <= 0 || priceInr == null || priceInr >= mrpInr) {
+        if (mrpInr == null || mrpInr <= 0 || discountInr == null || discountInr <= 0) {
             return 0;
         }
-        return Math.round(((mrpInr - priceInr) * 100f) / mrpInr);
+
+        if (discountInr >= mrpInr) {
+            return 0;
+        }
+
+        return Math.round(((mrpInr - discountInr) * 100f) / mrpInr);
     }
 }

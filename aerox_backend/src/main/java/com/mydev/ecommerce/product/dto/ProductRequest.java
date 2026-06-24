@@ -1,7 +1,6 @@
 
 
 
-
 package com.mydev.ecommerce.product.dto;
 
 import jakarta.validation.constraints.NotBlank;
@@ -18,10 +17,17 @@ public record ProductRequest(
 
         String description,
 
+        // Final selling price
         @NotNull
         Integer priceInr,
 
+        // Maximum Retail Price
+        @NotNull
         Integer mrpInr,
+
+        // Discounted price
+        @NotNull
+        Integer discountInr,
 
         @NotNull
         Integer stock,

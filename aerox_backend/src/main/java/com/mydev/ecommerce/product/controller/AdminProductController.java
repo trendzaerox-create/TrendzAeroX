@@ -1,4 +1,5 @@
 
+
 package com.mydev.ecommerce.product.controller;
 
 import com.mydev.ecommerce.category.repository.CategoryRepository;
@@ -51,14 +52,6 @@ public class AdminProductController {
         this.productService = productService;
     }
 
-    /*
-     * IMPORTANT:
-     * This admin list is now paginated.
-     * It does NOT load all products + all reviews at once.
-     *
-     * Example:
-     * /api/admin/products?page=0&size=50
-     */
     @GetMapping
     public List<ProductResponse> list(
             @RequestParam(defaultValue = "0") int page,
@@ -67,10 +60,6 @@ public class AdminProductController {
         return productService.getAdminProducts(page, size);
     }
 
-    /*
-     * Admin product detail/edit page.
-     * Loads one product only.
-     */
     @GetMapping("/{id}")
     public ProductResponse one(@PathVariable Long id) {
         return productService.getAdminProduct(id);
@@ -100,8 +89,11 @@ public class AdminProductController {
 
         p.setTitle(req.title());
         p.setDescription(req.description());
+
         p.setPriceInr(req.priceInr());
         p.setMrpInr(req.mrpInr());
+        p.setDiscountInr(req.discountInr());
+
         p.setStock(req.stock());
 
         p.setDisplayOrder(
@@ -156,8 +148,11 @@ public class AdminProductController {
 
         p.setTitle(req.title());
         p.setDescription(req.description());
+
         p.setPriceInr(req.priceInr());
         p.setMrpInr(req.mrpInr());
+        p.setDiscountInr(req.discountInr());
+
         p.setStock(req.stock());
 
         if (req.displayOrder() != null) {
@@ -269,6 +264,28 @@ public class AdminProductController {
         reviewRepo.delete(review);
     }
 
+    private void validatePricing(ProductRequest req) {
+        if (req.priceInr() == null || req.priceInr() <= 0) {
+            throw new RuntimeException("Final selling price must be greater than 0");
+        }
+
+        if (req.mrpInr() == null || req.mrpInr() <= 0) {
+            throw new RuntimeException("MRP must be greater than 0");
+        }
+
+        if (req.discountInr() == null || req.discountInr() <= 0) {
+            throw new RuntimeException("Discounted price must be greater than 0");
+        }
+
+        if (req.discountInr() > req.mrpInr()) {
+            throw new RuntimeException("Discounted price cannot be greater than MRP");
+        }
+
+        if (req.priceInr() > req.discountInr()) {
+            throw new RuntimeException("Final selling price cannot be greater than discounted price");
+        }
+    }
+
     private ProductReviewResponse mapReviewToResponse(ProductReview review) {
         return new ProductReviewResponse(
                 review.getId(),
@@ -277,20 +294,6 @@ public class AdminProductController {
                 review.getReviewText(),
                 review.isFeatured()
         );
-    }
-
-    private void validatePricing(ProductRequest req) {
-        if (req.priceInr() == null || req.priceInr() <= 0) {
-            throw new RuntimeException("Selling price must be greater than 0");
-        }
-
-        if (req.mrpInr() != null && req.mrpInr() <= 0) {
-            throw new RuntimeException("MRP must be greater than 0");
-        }
-
-        if (req.mrpInr() != null && req.mrpInr() < req.priceInr()) {
-            throw new RuntimeException("MRP must be greater than or equal to selling price");
-        }
     }
 
     private Integer getNextDisplayOrder() {
