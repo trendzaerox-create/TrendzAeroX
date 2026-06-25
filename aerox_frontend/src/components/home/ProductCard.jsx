@@ -199,14 +199,13 @@ export default function ProductCard({ product }) {
 
   const discountPercentageFromdiscountInr =
   mrp > 0 && discountInr > 0
-    ? Math.round((discountInr / mrp) * 100)
+    ? Math.round(((mrp - discountInr) / mrp) * 100)
     : 0;
 
 const discountPercent =
   discountPercentageFromdiscountInr > 0
     ? discountPercentageFromdiscountInr
     : Number(product.discountPercent || 0);
-
   
 
   const offerPrice =
