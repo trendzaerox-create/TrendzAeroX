@@ -1,5 +1,4 @@
 
-
 // package com.mydev.ecommerce.order.repository;
 
 // import com.mydev.ecommerce.order.model.Order;
@@ -9,17 +8,52 @@
 // import java.util.List;
 // import java.util.Optional;
 
-// public interface OrderRepository extends JpaRepository<Order, Long> {
+// public interface OrderRepository
+//         extends JpaRepository<Order, Long> {
 
-//     @EntityGraph(attributePaths = {"items", "items.product"})
-//     List<Order> findByUserIdOrderByIdDesc(Long userId);
+//     @EntityGraph(attributePaths = {
+//             "items",
+//             "items.product",
+//             "shipment"
+//     })
+//     List<Order> findByUserIdOrderByIdDesc(
+//             Long userId
+//     );
 
-//     @EntityGraph(attributePaths = {"items", "items.product"})
-//     Optional<Order> findByIdAndUserId(Long id, Long userId);
+//     @EntityGraph(attributePaths = {
+//             "items",
+//             "items.product",
+//             "shipment"
+//     })
+//     Optional<Order> findByIdAndUserId(
+//             Long id,
+//             Long userId
+//     );
 
-//     @EntityGraph(attributePaths = {"items", "items.product"})
+//     @EntityGraph(attributePaths = {
+//             "items",
+//             "items.product",
+//             "shipment"
+//     })
 //     List<Order> findAllByOrderByIdDesc();
+
+//     @EntityGraph(attributePaths = {
+//             "items",
+//             "items.product",
+//             "shipment",
+//             "user"
+//     })
+//     Optional<Order> findDetailedById(
+//             Long id
+//     );
 // }
+
+
+
+
+
+
+
 
 
 
@@ -74,5 +108,16 @@ public interface OrderRepository
     })
     Optional<Order> findDetailedById(
             Long id
+    );
+
+    // ✅ NEW: find admin order by order number like TF-BCC09946D1
+    @EntityGraph(attributePaths = {
+            "items",
+            "items.product",
+            "shipment",
+            "user"
+    })
+    Optional<Order> findDetailedByOrderNumber(
+            String orderNumber
     );
 }
