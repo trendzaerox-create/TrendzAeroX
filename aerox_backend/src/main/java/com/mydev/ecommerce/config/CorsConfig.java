@@ -17,7 +17,9 @@ public class CorsConfig {
     cfg.setAllowedOriginPatterns(List.of(
         "http://localhost:3000",
         "https://trendz-firenze-frontend.vercel.app",
-        "https://*.vercel.app"
+        "https://*.vercel.app",
+        "https://trendzaerox.com",
+        "https://www.trendzaerox.com"
     ));
 
     cfg.setAllowedMethods(List.of(

@@ -704,7 +704,7 @@ export default function CheckoutPage() {
         key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || razorpayOrder.key,
         amount: razorpayOrder.amount,
         currency: razorpayOrder.currency,
-        name: "Trendz Firenze",
+        name: "Trendz AeroX",
         description: isGiftSetMode ? "Gift Set Order Payment" : "Order Payment",
         order_id: razorpayOrder.razorpayOrderId,
         prefill: {
@@ -848,8 +848,8 @@ export default function CheckoutPage() {
           <div className="checkout-hero fade-up">
             <div className="checkout-hero-badge">
               {isGiftSetMode
-                ? "Trendz Firenze Gift Set Checkout"
-                : "Trendz Firenze Secure Checkout"}
+                ? "Trendz AeroX Gift Set Checkout"
+                : "Trendz AeroX Secure Checkout"}
             </div>
 
             <div className="checkout-hero-top">

@@ -1,4 +1,6 @@
 
+
+
 package com.mydev.ecommerce.config;
 
 import com.mydev.ecommerce.auth.security.JwtAuthFilter;
@@ -20,82 +22,99 @@ public class SecurityConfig {
     ) throws Exception {
 
         http
-            .csrf(csrf -> csrf.disable())
-            .cors(cors -> {})
-            .sessionManagement(sm ->
-                    sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-            )
-            .httpBasic(b -> b.disable())
-            .formLogin(f -> f.disable())
+                .csrf(csrf -> csrf.disable())
+                .cors(cors -> {})
+                .sessionManagement(sm ->
+                        sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                )
+                .httpBasic(b -> b.disable())
+                .formLogin(f -> f.disable())
 
-            .authorizeHttpRequests(auth -> auth
+                .authorizeHttpRequests(auth -> auth
 
-                .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
 
-                .requestMatchers(
-                        "/",
-                        "/ping",
-                        "/warmup",
-                        "/ping-test",
-                        "/error"
-                ).permitAll()
+                        .requestMatchers(
+                                "/",
+                                "/ping",
+                                "/warmup",
+                                "/ping-test",
+                                "/error"
+                        ).permitAll()
 
-                .requestMatchers("/api/auth/**").permitAll()
-                .requestMatchers("/api/guest-checkout/**").permitAll()
+                        .requestMatchers("/api/auth/**").permitAll()
+                        .requestMatchers("/api/guest-checkout/**").permitAll()
 
-                .requestMatchers("/api/products/**").permitAll()
-                .requestMatchers("/api/categories/**").permitAll()
-                .requestMatchers("/images/**").permitAll()
-                .requestMatchers("/api/brand-showcases/**").permitAll()
-                .requestMatchers("/api/hero-sections/**").permitAll()
-                .requestMatchers("/api/gift-boxes/**").permitAll()
-                .requestMatchers("/api/giftsets/**").permitAll()
-                .requestMatchers("/api/instagram/**").permitAll()
+                        .requestMatchers("/api/products/**").permitAll()
+                        .requestMatchers("/api/categories/**").permitAll()
+                        .requestMatchers("/images/**").permitAll()
+                        .requestMatchers("/api/brand-showcases/**").permitAll()
+                        .requestMatchers("/api/hero-sections/**").permitAll()
+                        .requestMatchers("/api/gift-boxes/**").permitAll()
+                        .requestMatchers("/api/giftsets/**").permitAll()
+                        .requestMatchers("/api/instagram/**").permitAll()
 
-                .requestMatchers(
-                        HttpMethod.POST,
-                        "/api/newsletter/subscribe"
-                ).permitAll()
+                        /*
+                         * Razorpay Webhook
+                         * Razorpay calls this endpoint from its server.
+                         * It will NOT send your JWT token.
+                         * Security is handled by X-Razorpay-Signature
+                         * verification inside RazorpayWebhookController / PaymentService.
+                         */
+                        .requestMatchers(
+                                HttpMethod.POST,
+                                "/api/payments/razorpay/webhook"
+                        ).permitAll()
 
-                .requestMatchers(
-                        HttpMethod.POST,
-                        "/api/bulk-orders"
-                ).permitAll()
+                        .requestMatchers(
+                                HttpMethod.POST,
+                                "/api/newsletter/subscribe"
+                        ).permitAll()
 
-                .requestMatchers(
-                        "/api/admin/bulk-orders/**"
-                ).hasRole("ADMIN")
+                        .requestMatchers(
+                                HttpMethod.POST,
+                                "/api/bulk-orders"
+                        ).permitAll()
 
-                /*
-                 * Instagram Admin
-                 * These are allowed by Spring Security,
-                 * but still protected by X-Admin-Refresh-Secret
-                 * inside InstagramAdminController.
-                 */
-                .requestMatchers(
-                        "/api/admin/instagram/**"
-                ).permitAll()
+                        .requestMatchers(
+                                "/api/admin/bulk-orders/**"
+                        ).hasRole("ADMIN")
 
-                .requestMatchers("/api/admin/gift-boxes/**").hasRole("ADMIN")
-                .requestMatchers("/api/admin/hero-sections/**").hasRole("ADMIN")
-                .requestMatchers("/api/admin/**").hasRole("ADMIN")
+                        /*
+                         * Instagram Admin
+                         * These are allowed by Spring Security,
+                         * but still protected by X-Admin-Refresh-Secret
+                         * inside InstagramAdminController.
+                         */
+                        .requestMatchers(
+                                "/api/admin/instagram/**"
+                        ).permitAll()
 
-                .requestMatchers("/api/addresses/**").authenticated()
-                .requestMatchers("/api/orders/**").authenticated()
-                .requestMatchers("/api/cart/**").authenticated()
-                .requestMatchers("/api/giftset-cart/**").authenticated()
+                        .requestMatchers("/api/admin/gift-boxes/**").hasRole("ADMIN")
+                        .requestMatchers("/api/admin/hero-sections/**").hasRole("ADMIN")
+                        .requestMatchers("/api/admin/**").hasRole("ADMIN")
 
-                .requestMatchers("/api/wishlist/**").authenticated()
+                        .requestMatchers("/api/addresses/**").authenticated()
+                        .requestMatchers("/api/orders/**").authenticated()
+                        .requestMatchers("/api/cart/**").authenticated()
+                        .requestMatchers("/api/giftset-cart/**").authenticated()
 
-                .requestMatchers("/api/user/**").hasAnyRole("CUSTOMER", "ADMIN")
+                        /*
+                         * Razorpay create-order and verify should stay authenticated.
+                         * They are protected by .anyRequest().authenticated().
+                         */
 
-                .anyRequest().authenticated()
-            )
+                        .requestMatchers("/api/wishlist/**").authenticated()
 
-            .addFilterBefore(
-                    jwtAuthFilter,
-                    UsernamePasswordAuthenticationFilter.class
-            );
+                        .requestMatchers("/api/user/**").hasAnyRole("CUSTOMER", "ADMIN")
+
+                        .anyRequest().authenticated()
+                )
+
+                .addFilterBefore(
+                        jwtAuthFilter,
+                        UsernamePasswordAuthenticationFilter.class
+                );
 
         return http.build();
     }

@@ -1,3 +1,358 @@
+
+// package com.mydev.ecommerce.shipment.client;
+
+// import com.fasterxml.jackson.databind.JsonNode;
+// import com.mydev.ecommerce.shipment.config.ShiprocketProperties;
+// import lombok.RequiredArgsConstructor;
+// import lombok.extern.slf4j.Slf4j;
+// import org.springframework.http.HttpHeaders;
+// import org.springframework.stereotype.Component;
+// import org.springframework.web.client.RestClient;
+// import org.springframework.web.client.RestClientResponseException;
+
+// import java.time.OffsetDateTime;
+// import java.util.LinkedHashMap;
+// import java.util.List;
+// import java.util.Map;
+
+// @Slf4j
+// @Component
+// @RequiredArgsConstructor
+// public class ShiprocketClient {
+
+//     private final RestClient shiprocketRestClient;
+
+//     private final ShiprocketProperties properties;
+
+//     private volatile String cachedToken;
+
+//     private volatile OffsetDateTime cachedTokenExpiresAt;
+
+//     public JsonNode createOrder(
+//             Map<String, Object> payload
+//     ) {
+//         return postWithAuth(
+//                 "/v1/external/orders/create/adhoc",
+//                 payload
+//         );
+//     }
+
+//     public JsonNode assignAwb(
+//             Long shipmentId,
+//             Integer courierId
+//     ) {
+//         if (shipmentId == null) {
+//             throw new RuntimeException(
+//                     "Shiprocket shipment id is required for AWB assignment"
+//             );
+//         }
+
+//         Map<String, Object> payload =
+//                 new LinkedHashMap<>();
+
+//         payload.put(
+//                 "shipment_id",
+//                 shipmentId
+//         );
+
+//         if (courierId != null) {
+//             payload.put(
+//                     "courier_id",
+//                     courierId
+//             );
+//         }
+
+//         return postWithAuth(
+//                 "/v1/external/courier/assign/awb",
+//                 payload
+//         );
+//     }
+
+//     public JsonNode generatePickup(
+//             Long shipmentId
+//     ) {
+//         if (shipmentId == null) {
+//             throw new RuntimeException(
+//                     "Shiprocket shipment id is required for pickup generation"
+//             );
+//         }
+
+//         Map<String, Object> payload =
+//                 new LinkedHashMap<>();
+
+//         payload.put(
+//                 "shipment_id",
+//                 List.of(shipmentId)
+//         );
+
+//         return postWithAuth(
+//                 "/v1/external/courier/generate/pickup",
+//                 payload
+//         );
+//     }
+
+//     public JsonNode trackByAwb(
+//             String awbCode
+//     ) {
+//         if (isBlank(awbCode)) {
+//             throw new RuntimeException(
+//                     "AWB code is required for Shiprocket tracking"
+//             );
+//         }
+
+//         return getWithAuth(
+//                 "/v1/external/courier/track/awb/{awbCode}",
+//                 awbCode.trim()
+//         );
+//     }
+
+//     private JsonNode postWithAuth(
+//             String path,
+//             Object payload
+//     ) {
+//         String token =
+//                 getValidToken();
+
+//         try {
+//             JsonNode response =
+//                     shiprocketRestClient
+//                             .post()
+//                             .uri(path)
+//                             .header(
+//                                     HttpHeaders.AUTHORIZATION,
+//                                     "Bearer " + token
+//                             )
+//                             .body(payload)
+//                             .retrieve()
+//                             .body(JsonNode.class);
+
+//             if (response == null) {
+//                 throw new RuntimeException(
+//                         "Shiprocket returned empty response"
+//                 );
+//             }
+
+//             return response;
+
+//         } catch (RestClientResponseException exception) {
+//             throw shiprocketApiException(
+//                     path,
+//                     exception
+//             );
+//         }
+//     }
+
+//     private JsonNode getWithAuth(
+//             String path,
+//             Object... uriVariables
+//     ) {
+//         String token =
+//                 getValidToken();
+
+//         try {
+//             JsonNode response =
+//                     shiprocketRestClient
+//                             .get()
+//                             .uri(
+//                                     path,
+//                                     uriVariables
+//                             )
+//                             .header(
+//                                     HttpHeaders.AUTHORIZATION,
+//                                     "Bearer " + token
+//                             )
+//                             .retrieve()
+//                             .body(JsonNode.class);
+
+//             if (response == null) {
+//                 throw new RuntimeException(
+//                         "Shiprocket returned empty response"
+//                 );
+//             }
+
+//             return response;
+
+//         } catch (RestClientResponseException exception) {
+//             throw shiprocketApiException(
+//                     path,
+//                     exception
+//             );
+//         }
+//     }
+
+//     private String getValidToken() {
+//         OffsetDateTime now =
+//                 OffsetDateTime.now();
+
+//         if (
+//                 !isBlank(cachedToken)
+//                         && cachedTokenExpiresAt != null
+//                         && cachedTokenExpiresAt.isAfter(now.plusMinutes(5))
+//         ) {
+//             return cachedToken;
+//         }
+
+//         synchronized (this) {
+//             now =
+//                     OffsetDateTime.now();
+
+//             if (
+//                     !isBlank(cachedToken)
+//                             && cachedTokenExpiresAt != null
+//                             && cachedTokenExpiresAt.isAfter(now.plusMinutes(5))
+//             ) {
+//                 return cachedToken;
+//             }
+
+//             return loginAndCacheToken();
+//         }
+//     }
+
+//     private String loginAndCacheToken() {
+//         if (isBlank(properties.getEmail())) {
+//             throw new RuntimeException(
+//                     "SHIPROCKET_EMAIL is missing"
+//             );
+//         }
+
+//         if (isBlank(properties.getPassword())) {
+//             throw new RuntimeException(
+//                     "SHIPROCKET_PASSWORD is missing"
+//             );
+//         }
+
+//         Map<String, Object> payload =
+//                 new LinkedHashMap<>();
+
+//         payload.put(
+//                 "email",
+//                 properties.getEmail().trim()
+//         );
+
+//         payload.put(
+//                 "password",
+//                 properties.getPassword().trim()
+//         );
+
+//         try {
+//             JsonNode response =
+//                     shiprocketRestClient
+//                             .post()
+//                             .uri("/v1/external/auth/login")
+//                             .body(payload)
+//                             .retrieve()
+//                             .body(JsonNode.class);
+
+//             if (response == null) {
+//                 throw new RuntimeException(
+//                         "Shiprocket auth returned empty response"
+//                 );
+//             }
+
+//             String token =
+//                     response
+//                             .path("token")
+//                             .asText(null);
+
+//             if (isBlank(token)) {
+//                 throw new RuntimeException(
+//                         "Shiprocket auth token missing. Response: " + response
+//                 );
+//             }
+
+//             cachedToken =
+//                     token.trim();
+
+//             long tokenValidHours =
+//                     Math.max(
+//                             1,
+//                             properties.getTokenValidHours()
+//                     );
+
+//             cachedTokenExpiresAt =
+//                     OffsetDateTime
+//                             .now()
+//                             .plusHours(tokenValidHours);
+
+//             log.info(
+//                     "Shiprocket auth token refreshed successfully"
+//             );
+
+//             return cachedToken;
+
+//         } catch (RestClientResponseException exception) {
+//             throw shiprocketApiException(
+//                     "/v1/external/auth/login",
+//                     exception
+//             );
+//         }
+//     }
+
+//     private RuntimeException shiprocketApiException(
+//             String path,
+//             RestClientResponseException exception
+//     ) {
+//         String responseBody =
+//                 exception.getResponseBodyAsString();
+
+//         String message =
+//                 "Shiprocket API failed. path="
+//                         + path
+//                         + ", status="
+//                         + exception.getStatusCode()
+//                         + ", response="
+//                         + responseBody;
+
+//         log.warn(
+//                 message
+//         );
+
+//         return new RuntimeException(
+//                 message,
+//                 exception
+//         );
+//     }
+
+//     private boolean isBlank(
+//             String value
+//     ) {
+//         return value == null
+//                 || value.isBlank();
+//     }
+// }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 package com.mydev.ecommerce.shipment.client;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -11,6 +366,7 @@ import org.springframework.web.client.RestClientResponseException;
 
 import java.time.OffsetDateTime;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 @Slf4j
@@ -39,6 +395,12 @@ public class ShiprocketClient {
             Long shipmentId,
             Integer courierId
     ) {
+        if (shipmentId == null) {
+            throw new RuntimeException(
+                    "Shiprocket shipment id is required for AWB assignment"
+            );
+        }
+
         Map<String, Object> payload =
                 new LinkedHashMap<>();
 
@@ -63,12 +425,18 @@ public class ShiprocketClient {
     public JsonNode generatePickup(
             Long shipmentId
     ) {
+        if (shipmentId == null) {
+            throw new RuntimeException(
+                    "Shiprocket shipment id is required for pickup generation"
+            );
+        }
+
         Map<String, Object> payload =
                 new LinkedHashMap<>();
 
         payload.put(
                 "shipment_id",
-                shipmentId
+                List.of(shipmentId)
         );
 
         return postWithAuth(
@@ -77,68 +445,213 @@ public class ShiprocketClient {
         );
     }
 
-    private JsonNode postWithAuth(
-            String path,
-            Object payload
+    public JsonNode trackByAwb(
+            String awbCode
     ) {
-        return postWithAuth(
-                path,
-                payload,
-                true
+        if (isBlank(awbCode)) {
+            throw new RuntimeException(
+                    "AWB code is required for Shiprocket tracking"
+            );
+        }
+
+        return getWithAuth(
+                "/v1/external/courier/track/awb/{awbCode}",
+                awbCode.trim()
         );
     }
 
     private JsonNode postWithAuth(
             String path,
-            Object payload,
-            boolean retryOnUnauthorized
+            Object payload
     ) {
+        String token =
+                getValidToken();
+
         try {
-            return shiprocketRestClient
-                    .post()
-                    .uri(path)
-                    .header(
-                            HttpHeaders.AUTHORIZATION,
-                            "Bearer " + getToken()
-                    )
-                    .body(payload)
-                    .retrieve()
-                    .body(JsonNode.class);
+            return postWithBearerToken(
+                    path,
+                    payload,
+                    token
+            );
 
         } catch (RestClientResponseException exception) {
-            if (
-                    retryOnUnauthorized
-                            && exception
-                            .getStatusCode()
-                            .value() == 401
-            ) {
-                clearToken();
-
-                return postWithAuth(
+            if (isAuthFailure(exception)) {
+                log.warn(
+                        "Shiprocket token rejected. Refreshing token and retrying once. path={}, status={}",
                         path,
-                        payload,
-                        false
+                        exception.getStatusCode()
                 );
+
+                clearCachedToken();
+
+                String refreshedToken =
+                        getValidToken();
+
+                try {
+                    return postWithBearerToken(
+                            path,
+                            payload,
+                            refreshedToken
+                    );
+
+                } catch (RestClientResponseException retryException) {
+                    throw shiprocketApiException(
+                            path,
+                            retryException
+                    );
+                }
             }
 
-            throw buildApiException(
+            throw shiprocketApiException(
                     path,
                     exception
             );
         }
     }
 
-    private synchronized String getToken() {
+    private JsonNode getWithAuth(
+            String path,
+            Object... uriVariables
+    ) {
+        String token =
+                getValidToken();
+
+        try {
+            return getWithBearerToken(
+                    path,
+                    token,
+                    uriVariables
+            );
+
+        } catch (RestClientResponseException exception) {
+            if (isAuthFailure(exception)) {
+                log.warn(
+                        "Shiprocket token rejected. Refreshing token and retrying once. path={}, status={}",
+                        path,
+                        exception.getStatusCode()
+                );
+
+                clearCachedToken();
+
+                String refreshedToken =
+                        getValidToken();
+
+                try {
+                    return getWithBearerToken(
+                            path,
+                            refreshedToken,
+                            uriVariables
+                    );
+
+                } catch (RestClientResponseException retryException) {
+                    throw shiprocketApiException(
+                            path,
+                            retryException
+                    );
+                }
+            }
+
+            throw shiprocketApiException(
+                    path,
+                    exception
+            );
+        }
+    }
+
+    private JsonNode postWithBearerToken(
+            String path,
+            Object payload,
+            String token
+    ) {
+        JsonNode response =
+                shiprocketRestClient
+                        .post()
+                        .uri(path)
+                        .header(
+                                HttpHeaders.AUTHORIZATION,
+                                "Bearer " + token
+                        )
+                        .body(payload)
+                        .retrieve()
+                        .body(JsonNode.class);
+
+        if (response == null) {
+            throw new RuntimeException(
+                    "Shiprocket returned empty response"
+            );
+        }
+
+        return response;
+    }
+
+    private JsonNode getWithBearerToken(
+            String path,
+            String token,
+            Object... uriVariables
+    ) {
+        JsonNode response =
+                shiprocketRestClient
+                        .get()
+                        .uri(
+                                path,
+                                uriVariables
+                        )
+                        .header(
+                                HttpHeaders.AUTHORIZATION,
+                                "Bearer " + token
+                        )
+                        .retrieve()
+                        .body(JsonNode.class);
+
+        if (response == null) {
+            throw new RuntimeException(
+                    "Shiprocket returned empty response"
+            );
+        }
+
+        return response;
+    }
+
+    private String getValidToken() {
+        OffsetDateTime now =
+                OffsetDateTime.now();
+
         if (
-                cachedToken != null
+                !isBlank(cachedToken)
                         && cachedTokenExpiresAt != null
-                        && OffsetDateTime.now()
-                        .isBefore(cachedTokenExpiresAt)
+                        && cachedTokenExpiresAt.isAfter(now.plusMinutes(5))
         ) {
             return cachedToken;
         }
 
-        validateEnabledAndCredentials();
+        synchronized (this) {
+            now =
+                    OffsetDateTime.now();
+
+            if (
+                    !isBlank(cachedToken)
+                            && cachedTokenExpiresAt != null
+                            && cachedTokenExpiresAt.isAfter(now.plusMinutes(5))
+            ) {
+                return cachedToken;
+            }
+
+            return loginAndCacheToken();
+        }
+    }
+
+    private String loginAndCacheToken() {
+        if (isBlank(properties.getEmail())) {
+            throw new RuntimeException(
+                    "SHIPROCKET_EMAIL is missing"
+            );
+        }
+
+        if (isBlank(properties.getPassword())) {
+            throw new RuntimeException(
+                    "SHIPROCKET_PASSWORD is missing"
+            );
+        }
 
         Map<String, Object> payload =
                 new LinkedHashMap<>();
@@ -150,7 +663,7 @@ public class ShiprocketClient {
 
         payload.put(
                 "password",
-                properties.getPassword()
+                properties.getPassword().trim()
         );
 
         try {
@@ -162,95 +675,108 @@ public class ShiprocketClient {
                             .retrieve()
                             .body(JsonNode.class);
 
-            String token =
-                    response != null
-                            ? response.path("token").asText(null)
-                            : null;
-
-            if (
-                    token == null
-                            || token.isBlank()
-            ) {
+            if (response == null) {
                 throw new RuntimeException(
-                        "Shiprocket auth token missing in response"
+                        "Shiprocket auth returned empty response"
                 );
             }
 
-            cachedToken = token;
+            String token =
+                    response
+                            .path("token")
+                            .asText(null);
+
+            if (isBlank(token)) {
+                throw new RuntimeException(
+                        "Shiprocket auth token missing. Response: " + response
+                );
+            }
+
+            cachedToken =
+                    token.trim();
+
+            long tokenValidHours =
+                    Math.max(
+                            1,
+                            properties.getTokenValidHours()
+                    );
 
             cachedTokenExpiresAt =
                     OffsetDateTime
                             .now()
-                            .plusHours(
-                                    properties
-                                            .getTokenValidHours()
-                            );
+                            .plusHours(tokenValidHours);
+
+            log.info(
+                    "Shiprocket auth token refreshed successfully"
+            );
 
             return cachedToken;
 
         } catch (RestClientResponseException exception) {
-            throw buildApiException(
+            clearCachedToken();
+
+            throw shiprocketApiException(
                     "/v1/external/auth/login",
                     exception
             );
         }
     }
 
-    private void clearToken() {
-        cachedToken = null;
-        cachedTokenExpiresAt = null;
-    }
+    private void clearCachedToken() {
+        synchronized (this) {
+            cachedToken =
+                    null;
 
-    private void validateEnabledAndCredentials() {
-        if (!properties.isEnabled()) {
-            throw new RuntimeException(
-                    "Shiprocket integration is disabled. "
-                            + "Set SHIPROCKET_ENABLED=true."
-            );
-        }
-
-        if (
-                properties.getEmail() == null
-                        || properties.getEmail().isBlank()
-        ) {
-            throw new RuntimeException(
-                    "SHIPROCKET_EMAIL is missing"
-            );
-        }
-
-        if (
-                properties.getPassword() == null
-                        || properties.getPassword().isBlank()
-        ) {
-            throw new RuntimeException(
-                    "SHIPROCKET_PASSWORD is missing"
-            );
+            cachedTokenExpiresAt =
+                    null;
         }
     }
 
-    private RuntimeException buildApiException(
+    private boolean isAuthFailure(
+            RestClientResponseException exception
+    ) {
+        if (exception == null || exception.getStatusCode() == null) {
+            return false;
+        }
+
+        int statusCode =
+                exception
+                        .getStatusCode()
+                        .value();
+
+        return statusCode == 401
+                || statusCode == 403;
+    }
+
+    private RuntimeException shiprocketApiException(
             String path,
             RestClientResponseException exception
     ) {
         String responseBody =
                 exception.getResponseBodyAsString();
 
-        if (
-                responseBody != null
-                        && responseBody.length() > 1000
-        ) {
-            responseBody =
-                    responseBody.substring(0, 1000);
-        }
+        String message =
+                "Shiprocket API failed. path="
+                        + path
+                        + ", status="
+                        + exception.getStatusCode()
+                        + ", response="
+                        + responseBody;
+
+        log.warn(
+                message
+        );
 
         return new RuntimeException(
-                "Shiprocket API failed -> "
-                        + path
-                        + " ["
-                        + exception.getStatusCode()
-                        + "] "
-                        + responseBody,
+                message,
                 exception
         );
+    }
+
+    private boolean isBlank(
+            String value
+    ) {
+        return value == null
+                || value.isBlank();
     }
 }

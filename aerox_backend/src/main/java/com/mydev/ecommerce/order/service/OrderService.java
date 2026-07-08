@@ -336,6 +336,59 @@
 //                 .toList();
 //     }
 
+//     @Transactional(readOnly = true)
+//     public OrderResponse adminOrderByIdentifier(
+//             String identifier
+//     ) {
+//         String value =
+//                 requiredValue(
+//                         identifier,
+//                         "Order identifier"
+//                 );
+
+//         Order order;
+
+//         if (value.matches("\\d+")) {
+//             Long orderId;
+
+//             try {
+//                 orderId =
+//                         Long.valueOf(value);
+
+//             } catch (NumberFormatException exception) {
+//                 throw new RuntimeException(
+//                         "Invalid order ID"
+//                 );
+//             }
+
+//             order =
+//                     orderRepository
+//                             .findDetailedById(
+//                                     orderId
+//                             )
+//                             .orElseThrow(() ->
+//                                     new RuntimeException(
+//                                             "Order not found"
+//                                     )
+//                             );
+
+//         } else {
+//             order =
+//                     orderRepository
+//                             .findDetailedByOrderNumber(
+//                                     value.trim()
+//                                             .toUpperCase(Locale.ROOT)
+//                             )
+//                             .orElseThrow(() ->
+//                                     new RuntimeException(
+//                                             "Order not found"
+//                                     )
+//                             );
+//         }
+
+//         return map(order);
+//     }
+
 //     public OrderResponse adminUpdateStatus(
 //             Long orderId,
 //             UpdateOrderStatusRequest request
@@ -601,8 +654,7 @@
 //                 "ONLINE".equalsIgnoreCase(
 //                         paymentType
 //                 )
-//                         && order.getPaymentStatus()
-//                         != null
+//                         && order.getPaymentStatus() != null
 //                         && "PAID".equalsIgnoreCase(
 //                         order
 //                                 .getPaymentStatus()
@@ -1156,48 +1208,6 @@
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 package com.mydev.ecommerce.order.service;
 
 import com.mydev.ecommerce.address.model.Address;
@@ -1592,20 +1602,6 @@ public class OrderService {
             Long orderId,
             UpdateOrderStatusRequest request
     ) {
-        Order order =
-                orderRepository
-                        .findDetailedById(
-                                orderId
-                        )
-                        .orElseThrow(() ->
-                                new RuntimeException(
-                                        "Order not found"
-                                )
-                        );
-
-        OrderStatus previousStatus =
-                order.getStatus();
-
         OrderStatus newStatus;
 
         try {
@@ -1627,6 +1623,46 @@ public class OrderService {
                             + request.status()
             );
         }
+
+        return updateStatusAndTriggerEvents(
+                orderId,
+                newStatus
+        );
+    }
+
+    public OrderResponse updateStatusFromSystem(
+            Long orderId,
+            OrderStatus newStatus
+    ) {
+        if (newStatus == null) {
+            throw new RuntimeException(
+                    "Order status is required"
+            );
+        }
+
+        return updateStatusAndTriggerEvents(
+                orderId,
+                newStatus
+        );
+    }
+
+    private OrderResponse updateStatusAndTriggerEvents(
+            Long orderId,
+            OrderStatus newStatus
+    ) {
+        Order order =
+                orderRepository
+                        .findDetailedById(
+                                orderId
+                        )
+                        .orElseThrow(() ->
+                                new RuntimeException(
+                                        "Order not found"
+                                )
+                        );
+
+        OrderStatus previousStatus =
+                order.getStatus();
 
         boolean reviewJobAlreadyExists =
                 orderReviewEmailJobRepository

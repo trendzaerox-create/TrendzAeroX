@@ -1,34 +1,3 @@
-// package com.mydev.ecommerce.shipment.dto;
-
-// import java.time.OffsetDateTime;
-
-// public record ShiprocketOrderResponse(
-//         Long id,
-//         Long ecommerceOrderId,
-//         String ecommerceOrderNumber,
-//         Long shiprocketOrderId,
-//         Long shiprocketShipmentId,
-//         String awbCode,
-//         String courierName,
-//         String courierCompanyId,
-//         String trackingUrl,
-//         String status,
-//         OffsetDateTime createdAt,
-//         OffsetDateTime updatedAt
-// ) {
-// }
-
-
-
-
-
-
-
-
-
-
-
-
 
 package com.mydev.ecommerce.shipment.dto;
 

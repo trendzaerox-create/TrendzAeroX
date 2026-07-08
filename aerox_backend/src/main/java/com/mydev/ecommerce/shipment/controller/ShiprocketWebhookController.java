@@ -1,9 +1,11 @@
+
 package com.mydev.ecommerce.shipment.controller;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.mydev.ecommerce.shipment.dto.ShiprocketOrderResponse;
 import com.mydev.ecommerce.shipment.service.ShiprocketService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -33,20 +35,36 @@ public class ShiprocketWebhookController {
                     required = false
             ) String apiKey
     ) {
-        Optional<ShiprocketOrderResponse> response =
-                shiprocketService
-                        .processTrackingWebhook(
-                                payload,
-                                apiKey
-                        );
+        try {
+            Optional<ShiprocketOrderResponse> response =
+                    shiprocketService
+                            .processTrackingWebhook(
+                                    payload,
+                                    apiKey
+                            );
 
-        return ResponseEntity.ok(
-                Map.of(
-                        "success",
-                        true,
-                        "matched",
-                        response.isPresent()
-                )
-        );
+            return ResponseEntity.ok(
+                    Map.of(
+                            "success",
+                            true,
+                            "matched",
+                            response.isPresent()
+                    )
+            );
+
+        } catch (ShiprocketService.InvalidWebhookSecretException exception) {
+            return ResponseEntity
+                    .status(HttpStatus.UNAUTHORIZED)
+                    .body(
+                            Map.of(
+                                    "success",
+                                    false,
+                                    "matched",
+                                    false,
+                                    "message",
+                                    "Invalid webhook secret"
+                            )
+                    );
+        }
     }
 }
